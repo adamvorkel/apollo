@@ -1,11 +1,9 @@
 const path = require('path');
-const util = require(__dirname + '/core/util');
+const util = require('./core/util');
 const config = util.getConfig();
-const pipeline = require(path.join(util.dirs().core, 'pipeline'));
+const pipeline = require('./core/pipeline');
 
-
-
-let pp = new pipeline(config);
+let instance = new pipeline(config);
 
 if(config.launchUI) {
     //require(path.join(util.dirs().web, 'server'))

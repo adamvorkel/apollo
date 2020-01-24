@@ -1,33 +1,90 @@
 const path = require('path');
 const util = require('./util');
 const config = util.getConfig();
-const apolloStream = require(path.join(util.dirs().core, 'apolloStream'));
-const Market = require(path.join(util.dirs().markets, "realtime"));
+const apolloStream = require('./apolloStream');
+
 
 class pipeline {
     constructor(config) {
-        this.plugins = [];
-        this.stream = new apolloStream(this.plugins);
-        this.market = new Market(config);
+        this.config = config;
+        this.plugins = {};
 
         this.loadPlugins();
+        this.setupMarket();
+        this.subscribePlugins();
+        this.startStream();
     }
 
-    setupMarket(config) {
-        market.pipe(this.stream);
-    }
+    
 
     loadPlugins() {
         const pluginDir = util.dirs().plugins;
-        let pluginMeta = require(path.join(util.dirs().root, "plugins.js"));
+        let pluginMeta = require('../plugins/plugins');
+        const mode = this.config.mode;
+
         pluginMeta.forEach(plugin => {
-            if(plugin.modes.includes(config.mode)) {
-                let pluginPath = path.join(pluginDir, plugin.slug);
-                let pluginType = require(pluginPath);
-                let pluginInstance = new pluginType();
-                this.plugins.push(pluginInstance);
+            if(plugin.enabled) {
+                if(plugin.modes.includes(mode)) {
+                    let pluginPath = path.join(pluginDir, plugin.slug);
+                    let pluginType = require(pluginPath);
+                    let pluginInstance = new pluginType();
+                    pluginInstance.meta = plugin;
+                    this.plugins[plugin.slug] = pluginInstance;
+                }
+            } 
+        });
+    }
+
+    setupMarket() {
+        const Market = require('./markets/realtime');
+        this.market = new Market(this.config);
+    }
+
+    subscribePlugins() {
+        for(const pluginSlug in this.plugins) {
+            let plugin = this.plugins[pluginSlug];
+            if(plugin.meta.subscriptions !== undefined) {
+                //handle each subscription
+                plugin.meta.subscriptions.forEach((sub) => {
+                    if(sub.emitter === "market") {
+                        this.market.on(sub.event, plugin[sub.handler]);
+                    } else {
+                        let emitter = this.plugins[sub.emitter];
+                        if(emitter) {
+                            emitter.on(sub.event, plugin[sub.handler])
+                        } else {
+                            console.log(`${pluginSlug} wants to subscribe to ${sub.emitter} but it is not enabled`);
+                            process.exit();
+                        }
+                    }
+                    
+                    
+                });
+            }
+        }
+    }
+
+    startStream() {
+        let candleConsumers = {};
+        for(const pluginSlug in this.plugins) {
+            let plugin = this.plugins[pluginSlug];
+            if(plugin.meta.candleConsumer) {
+                candleConsumers[pluginSlug] = plugin;
+            }
+        }
+
+        this.stream = new apolloStream(candleConsumers);
+        this.stream.on("finalize", () => {
+            for(const pluginSlug in this.plugins) {
+                let plugin = this.plugins[pluginSlug];
+                if(plugin.finalize) {
+                    plugin.finalize();
+                }
             }
         });
+
+        
+        //market.pipe(this.stream);
     }
 }
 
