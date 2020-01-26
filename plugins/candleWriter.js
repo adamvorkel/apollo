@@ -8,7 +8,7 @@ class CandleWriter extends emitter {
     }
 
     processCandle() {
-        console.log(`CandleWriter received a candle`)
+        //console.log(`CandleWriter received a candle`)
     }
 
     finalize() {
@@ -16,8 +16,8 @@ class CandleWriter extends emitter {
     }
 
     processTrades(trades) {
-        console.log(`CandleWriter recieved new trades...`);
-        console.log(trades);
+        //console.log(`CandleWriter recieved new trades...`);
+        //console.log(trades);
     }
 }
 
