@@ -92,6 +92,7 @@ class Binance {
     
             request(options, (err, response, body) => {
                 let payload = JSON.parse(body);
+                
                 if(err) {
                     reject(err)
                 } else if(response.statusCode < 200 || response.statusCode > 299) {
@@ -115,31 +116,30 @@ class Binance {
     }
 
     getTrades(since) {
-        //return 
         let query = {
-            symbol: this.pair,
-            startTime: since,
-            endTime: Date.UTC(2020, 0, 24, 17, 0, 30)
+            symbol: this.pair
         };
 
-        this._makeRequest(query, 'api/v3/aggTrades')
-        .then(data => {
-            console.log(data)
-        })
-        .catch(error => {
-            console.log(`ERRRRROR: ${error}`);
-        })
+        if(since) {
+            let anHourLater = since + (60 * 60 * 1000);
+            let now = new Date().getTime();
+            query.startTime = since;
+            query.endTime = anHourLater > now ? now : anHourLater; // add an hour in milliseconds, if in future, default to now
+        }
 
-        return new Promise((res, rej) => {
-            setTimeout(() => {
-                // let newTrades = [
-                //     {tid: 1, price: 10, date: "", amount: 12},
-                //     {tid: 2, price: 10, date: "", amount: 12},
-                //     {tid: 3, price: 10, date: "", amount: 12},
-                //     {tid: 4, price: 10, date: "", amount: 12}
-                // ];
-                res([]);
-            }, 200)
+        return this._makeRequest(query, 'api/v3/aggTrades')
+        .then(data => {
+            console.log(data.length)
+            let parsedTrades = [];
+            data.forEach(trade => {
+                parsedTrades.push({
+                    tid: trade.a,
+                    date: trade.T,
+                    price: parseFloat(trade.p),
+                    quantity: parseFloat(trade.q)
+                });
+            });
+            return parsedTrades;
         });
     }
     
@@ -205,16 +205,16 @@ class Binance {
     }
 }
 
-const foo = new Binance({
-    watch: {
-        exchange: "binance",
-        currency: "USDT",
-        asset: "BTC",
-        tickrate: 20,
-        key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
-        secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
-    }
-});
+// const foo = new Binance({
+//     watch: {
+//         exchange: "binance",
+//         currency: "USDT",
+//         asset: "BTC",
+//         tickrate: 20,
+//         key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
+//         secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
+//     }
+// });
 
 // foo.newOrder({
 //     symbol: "BTCUSDT", 
@@ -240,7 +240,5 @@ const foo = new Binance({
 // .then(res => {
 //     console.log(`CANCELLED ${res}`);
 // })
-
-foo._getDrift().then(res => console.log(res))
 
 module.exports = Binance;
