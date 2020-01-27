@@ -25,19 +25,7 @@ class Binance {
         return new Date().getTime();
     }
 
-    async _getDrift() {
-        const systemTime = this._getTime();
-        let serverTime = await this.time();
-        serverTime = serverTime.serverTime;
-        let transitTime = parseInt((this._getTime() - systemTime) / 2);
-        let drift = serverTime - (systemTime + transitTime);
-        return drift;
-    }
-
-    async time() {
-        let serverTime = await this._makeRequest({}, 'api/v3/time');
-        return serverTime;
-    }
+    
 
     _sign(queryString) {
         return crypto
@@ -115,6 +103,18 @@ class Binance {
         });
     }
 
+    time() {
+        return this._makeRequest({}, "api/v3/time");
+    }
+    
+    aggTrades(query) {
+        return this._makeRequest(query, "api/v3/aggTrades");
+    }
+
+    // to get aggregated trades for pair
+    // optional since parameter (unix timestamp in milliseconds)
+    // if since is passed, will return the hour of trades since then
+    // defaults to 
     getTrades(since) {
         let query = {
             symbol: this.pair
@@ -124,7 +124,8 @@ class Binance {
             let anHourLater = since + (60 * 60 * 1000);
             let now = new Date().getTime();
             query.startTime = since;
-            query.endTime = anHourLater > now ? now : anHourLater; // add an hour in milliseconds, if in future, default to now
+            // add an hour in milliseconds, if in future, default to now
+            query.endTime = anHourLater > now ? now : anHourLater; 
         }
 
         return this._makeRequest(query, 'api/v3/aggTrades')
@@ -143,10 +144,20 @@ class Binance {
         });
     }
     
-
-    aggTrades(query) {
-        return this._makeRequest(query, "api/v3/aggTrades");
+    async _getDrift() {
+        const systemTime = this._getTime();
+        let serverTime = await this.time();
+        serverTime = serverTime.serverTime;
+        let transitTime = parseInt((this._getTime() - systemTime) / 2);
+        let drift = serverTime - (systemTime + transitTime);
+        return drift;
     }
+
+    klines(query = {}) {
+        query.symbol = this.pair;
+        return this._makeRequest(query, "api/v3/klines");
+    }
+    
 
     //SIGNED requests
 
@@ -202,6 +213,27 @@ class Binance {
     //API methods
     historicalTrades(query) {
         return this._makeRequest(query, "api/v3/historicalTrades", "API-KEY");
+    }
+
+    //utility methods
+    addOrder(tradeType, quantity, price) {
+        let req = {
+            symbol: this.pair,
+            side: tradeType.toUpperCase(),
+            type: "LIMIT",
+            timeInForce: "GTC",
+            quantity: quantity,
+            price: price,
+        };
+        return this.newOrder(req);
+    }
+
+    buy(quantity, price) {
+        return this.addOrder('buy', quantity, price);
+    }
+
+    sell(quantity, price) {
+        return this.addOrder('sell', quantity, price);
     }
 }
 

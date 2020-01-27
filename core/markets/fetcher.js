@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const BinanceWrapper = require('./exchange/wrappers/binance');
 
+
 class Fetcher extends EventEmitter {
     constructor(config) {
         super();
@@ -10,6 +11,7 @@ class Fetcher extends EventEmitter {
         // load exchange
         this.exchange = new BinanceWrapper(config);
         this.pair = `${config.watch.currency}/${config.watch.asset}`;
+        
     }
 
     fetch() {
@@ -66,6 +68,17 @@ class Fetcher extends EventEmitter {
         this.emit('marketUpdate', batch.last.date);
         this.emit('trades', batch);
     }
+
+    //trying out the websocket kline stream
+    
+
+    //just trying out kline method on fetcher
+    // getCandles() {
+    //     this.exchange.klines({interval: "1m"})
+    //     .then(klines => {
+    //         console.log(`Klines ${klines.length} - first ${klines[0]}`);
+    //     });
+    // }
 }
 
 module.exports = Fetcher;

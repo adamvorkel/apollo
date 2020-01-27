@@ -7,7 +7,7 @@ let plugins = [
             "realtime",
             "paper"
         ],
-        candleConsumer: true,
+        // candleConsumer: true,
         subscriptions: [
             {
                 emitter: "market",
@@ -31,6 +31,7 @@ let plugins = [
             "realtime",
             "paper"
         ],
+        candleConsumer: true,
         subscriptions: [
             // {
             //     emitter: "poopie",
@@ -59,7 +60,14 @@ let plugins = [
         slug: "poopie",
         enabled: true,
         modes: ["realtime"],
-        emits: "poop"
+        emits: "poop",
+        subscriptions: [
+            {
+                emitter: "tradingAdvisor",
+                event: "advice",
+                handler: "processAdvice"
+            }
+        ]
     }
 ];
 

@@ -2,7 +2,7 @@ const path = require('path');
 const util = require('./util');
 const config = util.getConfig();
 const apolloStream = require('./apolloStream');
-
+const fs = require('fs');
 
 class pipeline {
     constructor(config) {
@@ -26,10 +26,17 @@ class pipeline {
             if(plugin.enabled) {
                 if(plugin.modes.includes(mode)) {
                     let pluginPath = path.join(pluginDir, plugin.slug);
+                    
                     let pluginType = require(pluginPath);
-                    let pluginInstance = new pluginType();
-                    pluginInstance.meta = plugin;
-                    this.plugins[plugin.slug] = pluginInstance;
+                    try {
+                        let pluginInstance = new pluginType();
+                        pluginInstance.meta = plugin;
+                        this.plugins[plugin.slug] = pluginInstance;
+                    } catch(err) {
+                        console.log("EISH " + err);
+                    }
+                    
+                    
                 }
             } 
         });
@@ -38,6 +45,7 @@ class pipeline {
     setupMarket() {
         const Market = require('./markets/realtime');
         this.market = new Market(this.config);
+        this.market.run();
     }
 
     subscribePlugins() {
@@ -84,7 +92,10 @@ class pipeline {
         });
 
         
-        //market.pipe(this.stream);
+        this.market.pipe(this.stream);
+        this.market.on("end", () => {
+            console.log("Market stream ended")
+        })
     }
 }
 

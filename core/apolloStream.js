@@ -7,15 +7,17 @@ class apolloStream extends stream {
         }
         super(options);
         this.consumers = consumers;
-
-        //when candle arrives
-        for(const pluginSlug in this.consumers) {
-            this.consumers[pluginSlug].processCandle();
-        }
     }
 
     finalize() {
         this.emit("finalize");
+    }
+
+    _write(candle, endcoding, done) {
+        for(const pluginSlug in this.consumers) {
+            this.consumers[pluginSlug].processCandle(candle);
+        }
+        done();
     }
 }
 

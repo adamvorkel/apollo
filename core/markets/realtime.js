@@ -1,6 +1,7 @@
 const Readable = require('stream').Readable;
 const Heart = require('./heart');
 const Fetcher = require('./fetcher');
+const BinanceWS = require('./exchange/wrappers/binanceWS');
 const CandleManager = require('./candleManager');
 
 class Realtime extends Readable {
@@ -9,7 +10,9 @@ class Realtime extends Readable {
         this.heart = new Heart(config);
         this.fetcher = new Fetcher(config);
         this.candleManager = new CandleManager();
-        this.run();
+        this.setupStream();
+        this.ws;
+        this.lastCandle = 0;
     }
 
     run() {
@@ -26,13 +29,14 @@ class Realtime extends Readable {
         });
 
         this.heart.on('tick', () => {
-            this.fetcher.fetch();
+            // this.fetcher.fetch();
         });
 
         this.fetcher.on('trades', (trades) => {
             //this.candleManager.processTrades(trades);
             console.log("RECIEVED TRADESSSSS")
         });
+
 
         // this.candleManager.on('candles', (candles) => {
             //this.pushCandles(candles);
@@ -46,6 +50,33 @@ class Realtime extends Readable {
     }
 
     _read() {}
+
+    setupStream() {
+        this.ws = new BinanceWS();
+        this. ws.onKline("BTCUSDT", "1m", (payload) => {
+            let res = JSON.parse(payload);
+            let kline = res.k;
+
+            let candle = {
+                isClosed: kline.x,
+                time: res.E,
+                start: kline.t,
+                open: kline.o,
+                close: kline.c,
+                hight: kline.h,
+                low: kline.l,
+                trades: kline.n,
+                volume: kline.v
+            };
+
+            if(candle.start > this.lastCandle.start) {
+                this.push(this.lastCandle);
+            }
+
+            this.lastCandle = candle;
+            
+        });
+    }
 
     
 }

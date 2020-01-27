@@ -25,9 +25,17 @@ class BinanceWS {
         ws.on('message', (message) => {
             eventHandler(message);
         });
+
+        // ws.on('ping', () {
+
+        // })
         
         ws.on('error', (err) => {
+            console.log(err);
+        });
 
+        ws.on('close', () => {
+            console.log("Websocket closed");
         });
 
         return ws;
@@ -41,8 +49,8 @@ class BinanceWS {
         return this._setupWS(eventHandler, this.streams.depthLevel(symbol));
     }
 
-    onKline(symbol, eventHandler) {
-        return this._setupWS(eventHandler, this.streams.kline(symbol));
+    onKline(symbol, interval, eventHandler) {
+        return this._setupWS(eventHandler, this.streams.kline(symbol, interval));
     }
 
     onAggTrade(symbol, eventHandler) {
@@ -76,11 +84,4 @@ class BinanceWS {
     }
 }
 
-let bs = new BinanceWS();
-let depth = bs.onKline("BNBBTC", "1m", (message) => {
-    console.log(`MESSAGE: ${message}`)
-});
-
-console.log(`DEPTH ${depth}`)
-
-// module.exports = BinanceWS;
+module.exports = BinanceWS;
