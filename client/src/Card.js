@@ -1,12 +1,25 @@
 import React, {Component} from 'react';
 
 class Card extends Component {
+    
+
     render() {
-        return (
-            <div className="card">
-                <h2>Card heading</h2>
-            </div>
-        )
+        if(this.props.children) {
+            return (
+                <div className="card">
+                    
+                    {this.props.children}
+                </div>
+            )
+        } else {
+            return (
+                <div className="card">
+                    
+                    <h2>Empty card</h2>
+                </div>
+            )
+        }
+        
     }
 }
 

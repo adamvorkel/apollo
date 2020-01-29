@@ -3,8 +3,8 @@ const util = require('./core/util');
 const config = util.getConfig();
 const pipeline = require('./core/pipeline');
 
-if(config.launchUI) {
-    let ui = require('./server');
+if(config.launchUI) {  
 }
 
-let instance = new pipeline(config);
+let api = require('./server');
+return api;

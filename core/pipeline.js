@@ -13,6 +13,7 @@ class pipeline {
         this.setupMarket();
         this.subscribePlugins();
         this.startStream();
+        console.log(`Pipeline started`)
     }
 
     

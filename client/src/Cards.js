@@ -1,15 +1,16 @@
 import React, {Component} from 'react';
 import Card from './Card';
+import Bots from './Bots';
 
 class Cards extends Component {
     render() {
         return (
             <main className="cards">
+                <Card>
+                    <Bots />
+                </Card>
                 <Card />
-                <Card />
-                <div className="card big">
-                    <h2>Card heading</h2>
-                </div>
+                
                 <Card />
                 <Card />
                 <Card />
