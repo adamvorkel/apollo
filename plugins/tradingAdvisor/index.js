@@ -1,6 +1,7 @@
 const path = require('path');
 const EventEmitter = require('events');
 const strategyConfig = require('../../config').strategy;
+const originalConfig = require('../../config');
 
 class TradingAdvisor extends EventEmitter {
     constructor() {
@@ -29,7 +30,7 @@ class TradingAdvisor extends EventEmitter {
     }
 
     processCandle(candle) {
-        let output = `candle - Open: ${candle.open} | Close: ${candle.close} | Movement: ${candle.close - candle.open}`;
+        let output = `candle ${originalConfig.pair} - Open: ${candle.open} | Close: ${candle.close} | Movement: ${candle.close - candle.open}`;
         if(this.lastCandleTime) {
             output += " | elapsed: " + ((candle.start - this.lastCandleTime) / 1000) + " s";
         }

@@ -4,10 +4,7 @@ const config = util.getConfig();
 const pipeline = require('./core/pipeline');
 
 if(config.launchUI) {
-    let ui = require('./web/server');
+    let ui = require('./server');
 }
 
 let instance = new pipeline(config);
-
-
-
