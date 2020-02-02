@@ -63,7 +63,7 @@ class Realtime extends Readable {
                 start: kline.t,
                 open: kline.o,
                 close: kline.c,
-                hight: kline.h,
+                high: kline.h,
                 low: kline.l,
                 trades: kline.n,
                 volume: kline.v
