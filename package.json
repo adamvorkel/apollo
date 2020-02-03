@@ -4,12 +4,15 @@
   "description": "A simple trading bot",
   "main": "apollo.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "Adam Vorkel",
   "license": "ISC",
   "dependencies": {
     "request": "^2.88.0",
     "ws": "^7.2.1"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
   }
 }
