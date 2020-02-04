@@ -25,10 +25,6 @@ class BinanceWS {
         ws.on('message', (message) => {
             eventHandler(message);
         });
-
-        // ws.on('ping', () {
-
-        // })
         
         ws.on('error', (err) => {
             console.log(err);

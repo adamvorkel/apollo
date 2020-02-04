@@ -2,11 +2,33 @@
 const { fork } = require('child_process');
 const path = require('path');
 const { EventEmitter } = require('events');
+const Market = require('./core/markets/realtime');
 
 class BotManager extends EventEmitter {
     constructor() {
         super();
         this.bots = {};
+        this.market = new Market();
+        this.stream = null;
+        
+    }
+
+    setupMarket() {
+        const pairs = [];
+        for(const botID in this.bots) {
+            const bot = this.bots[botID];
+            const pair = bot.pair;
+            pairs.push(pair);
+        }
+
+        if(this.stream) {
+            // console.log("Stream already OPEN")
+        }
+
+        this.stream = this.market.subscribe(pairs);
+        this.market.on('data', data => {
+            console.log(data.stream);
+        });
     }
 
     count() {
@@ -26,13 +48,15 @@ class BotManager extends EventEmitter {
     }
 
     add(config) {
-        // console.log(config)
+
         //create unique ID
         const uid = this.generateUID();
+
         //fork a child bot
         let child = fork(path.join(__dirname, "/workers/bot"));
         child.on('message', (message) => {
             if(message === 'ready') {
+                this.setupMarket();
                 return child.send({
                     task: 'start',
                     config: config
@@ -47,9 +71,11 @@ class BotManager extends EventEmitter {
         child.on('exit', () => {
             console.log("child exited");
         });
+
         //add bot to list
         this.bots[uid] = {
             uid: uid,
+            pair: config.watch.asset + config.watch.currency,
             mode: config.mode,
             start: Date.now(),
             instance: child

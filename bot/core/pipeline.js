@@ -44,9 +44,9 @@ class pipeline {
     }
 
     setupMarket() {
-        const Market = require('./markets/realtime');
-        this.market = new Market(this.config);
-        this.market.run();
+        // const Market = require('./markets/realtime');
+        // this.market = new Market(this.config);
+        // this.market.run();
     }
 
     subscribePlugins() {
@@ -56,7 +56,7 @@ class pipeline {
                 //handle each subscription
                 plugin.meta.subscriptions.forEach((sub) => {
                     if(sub.emitter === "market") {
-                        this.market.on(sub.event, plugin[sub.handler]);
+                        // this.market.on(sub.event, plugin[sub.handler]);
                     } else {
                         let emitter = this.plugins[sub.emitter];
                         if(emitter) {
@@ -93,10 +93,10 @@ class pipeline {
         });
 
         
-        this.market.pipe(this.stream);
-        this.market.on("end", () => {
-            console.log("Market stream ended")
-        })
+        // this.market.pipe(this.stream);
+        // this.market.on("end", () => {
+            // console.log("Market stream ended")
+        // })
     }
 }
 
