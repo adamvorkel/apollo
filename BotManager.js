@@ -1,9 +1,11 @@
 // managers intances of bots
 const { fork } = require('child_process');
 const path = require('path');
+const { EventEmitter } = require('events');
 
-class BotManager {
+class BotManager extends EventEmitter {
     constructor() {
+        super();
         this.bots = {};
     }
 
@@ -41,6 +43,7 @@ class BotManager {
                 });
             }
         });
+
         child.on('exit', () => {
             console.log("child exited");
         });
@@ -51,8 +54,13 @@ class BotManager {
             start: Date.now(),
             instance: child
         };
+
         console.log(`Bot ${uid} running (${this.count()} running)`);
-        this.count();
+        
+        this.emit('botStarted', {
+            id: uid,
+            config: config
+        });
     }
 
     stop(id) {

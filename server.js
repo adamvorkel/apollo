@@ -8,23 +8,27 @@ const bots = new BotManager();
 
 // Create a bot instance for dev/testing
 // remove later
-let firstBotConfig  = {
-    launchUI: true,
-    mode: "realtime",
-    watch: {
-        exchange: "binance",
-        currency: "USDT",
-        asset: "BTC",
-        tickrate: 10,
-        key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
-        secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
-    },
-    strategy: {
-        
-    }
-};
 
-bots.add(firstBotConfig);
+setTimeout(() => {
+    let firstBotConfig  = {
+        launchUI: true,
+        mode: "realtime",
+        watch: {
+            exchange: "binance",
+            currency: "USDT",
+            asset: "BTC",
+            tickrate: 10,
+            key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
+            secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
+        },
+        strategy: {
+            
+        }
+    };
+    
+    bots.add(firstBotConfig);
+}, 10000)
+
 
 
 
@@ -91,8 +95,11 @@ setInterval(() => {
     })
 }, 10 * 1000);
 
-const broadcast = data => {
-    const payload = JSON.stringify(data);
+const broadcast = (event, data) => {
+    const payload = JSON.stringify({
+        event: event, 
+        payload: data
+    });
     wss.clients.forEach(ws => {
         ws.send(payload, err => {
             if(err) {
@@ -101,6 +108,10 @@ const broadcast = data => {
         })
     })
 }
+
+bots.on('botStarted', (payload) => {
+    broadcast('botStarted', payload);
+});
 
 
 return app;

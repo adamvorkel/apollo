@@ -41,6 +41,22 @@
 .App-link {
 }
 
+.conn-status {
+	color: #fff;
+}
+
+.conn-status.connecting {
+	color: #999900;
+}
+
+.conn-status.connected {
+	color: #009900;
+}
+
+.conn-status.disconnected {
+	color: #990000;
+}
+
 .App-content {
 	display: grid;
 	grid-template-areas: 

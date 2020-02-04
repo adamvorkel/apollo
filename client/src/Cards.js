@@ -3,11 +3,15 @@ import Card from './Card';
 import Bots from './Bots';
 
 class Cards extends Component {
+    constructor(props) {
+        super(props);
+    }
+
     render() {
         return (
             <main className="cards">
                 <Card>
-                    <Bots />
+                    <Bots bots={this.props.bots}/>
                 </Card>
                 <Card />
                 
