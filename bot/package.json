@@ -1,10 +1,11 @@
 {
-  "name": "apollo",
+  "name": "bot",
   "version": "1.0.0",
-  "description": "A simple trading bot",
-  "main": "apollo.js",
+  "description": "A crypto trading bot",
+  "main": "apollo",
   "scripts": {
-    "test": "jest"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "Adam Vorkel",
   "license": "ISC",
@@ -12,6 +13,5 @@
     "express": "^4.17.1",
     "request": "^2.88.0",
     "ws": "^7.2.1"
-  },
-  "devDependencies": {}
+  }
 }
