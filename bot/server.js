@@ -27,7 +27,7 @@ setTimeout(() => {
     };
     
     bots.add(firstBotConfig);
-}, 2000);
+}, 0);
 
 setTimeout(() => {
     let secondBotConfig  = {
@@ -58,7 +58,7 @@ const port = 3001;
 
 // app middleware config
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({extended: true}));
 
 // Endpoints
 

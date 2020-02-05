@@ -9,26 +9,35 @@ class BotManager extends EventEmitter {
         super();
         this.bots = {};
         this.market = new Market();
-        this.stream = null;
-        
+        this.market.on('data', payload => {
+            if(payload.stream) {
+
+                let kline = payload.data.k;
+                let time = payload.data.E;
+                let candle = {
+                    isClosed: kline.x,
+                    time: time,
+                    start: kline.t,
+                    open: kline.o,
+                    close: kline.c,
+                    high: kline.h,
+                    low: kline.l,
+                    trades: kline.n,
+                    volume: kline.v
+                }
+
+                for(const botID in this.bots) {
+                    const bot = this.bots[botID];
+                    bot.instance.send({task: 'candle', candle: candle})
+                }
+            } else {
+                console.log(payload);
+            }
+        });
     }
 
-    setupMarket() {
-        const pairs = [];
-        for(const botID in this.bots) {
-            const bot = this.bots[botID];
-            const pair = bot.pair;
-            pairs.push(pair);
-        }
-
-        if(this.stream) {
-            // console.log("Stream already OPEN")
-        }
-
-        this.stream = this.market.subscribe(pairs);
-        this.market.on('data', data => {
-            console.log(data.stream);
-        });
+    subscribeToStream(pair) {
+        return this.market.subscribe([pair]);
     }
 
     count() {
@@ -48,19 +57,26 @@ class BotManager extends EventEmitter {
     }
 
     add(config) {
-
-        //create unique ID
+        // create unique ID
         const uid = this.generateUID();
+        const pair = config.watch.asset + config.watch.currency;
 
-        //fork a child bot
+        // fork a child bot
         let child = fork(path.join(__dirname, "/workers/bot"));
         child.on('message', (message) => {
+            // wait for bot to spin up
             if(message === 'ready') {
-                this.setupMarket();
-                return child.send({
-                    task: 'start',
-                    config: config
-                });
+                // initiate a ws subscription for bots trading pair
+                this.subscribeToStream(pair)
+                    .then(() => {
+                        // once subscriptions confirmed, start the bot
+                        return child.send({
+                            task: 'start',
+                            config: config
+                        });
+                    });
+            // TODO:
+            // close ws for this bots pair then send exit
             } else if(message === 'done') {
                 return child.send({
                     task: 'exit'
@@ -81,12 +97,16 @@ class BotManager extends EventEmitter {
             instance: child
         };
 
-        console.log(`Bot ${uid} running (${this.count()} running)`);
+        // console.log(`Bot ${uid} running (${this.count()} running)`);
         
         this.emit('botStarted', {
             id: uid,
             config: config
         });
+    }
+
+    handleChildMessage(message) {
+
     }
 
     stop(id) {

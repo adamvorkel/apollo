@@ -3,6 +3,7 @@ const Heart = require('./heart');
 const Fetcher = require('./fetcher');
 const BinanceWS = require('./exchange/wrappers/binanceWS');
 const CandleManager = require('./candleManager');
+const WebSocket = require('ws');
 
 class Realtime extends Readable {
     constructor(config) {
@@ -10,63 +11,71 @@ class Realtime extends Readable {
         // this.heart = new Heart(config);
         // this.fetcher = new Fetcher(config);
         // this.candleManager = new CandleManager();
-        this.ws = new BinanceWS();
+        this.dataProvider = new BinanceWS();
+        this.pairs = [];
+        this.ws = null;
         // this.lastCandle = 0;
     }
 
-    //remove this later
-    run() {
-        // this.fetcher.on('marketStart', () => {
-        //     this.emit('marketStart');
-        // });
 
-        // this.fetcher.on('marketUpdate', () => {
-        //     this.emit('marketUpdate');
-        // });
-
-        // this.fetcher.on('trades', trades => {
-        //     this.emit('trades', trades);
-        // });
-
-        // this.heart.on('tick', () => {
-        //     // this.fetcher.fetch();
-        // });
-
-        // this.fetcher.on('trades', (trades) => {
-        //     //this.candleManager.processTrades(trades);
-        //     console.log("RECIEVED TRADESSSSS")
-        // });
-
-
-        // // this.candleManager.on('candles', (candles) => {
-        //     //this.pushCandles(candles);
-        // // });
-
-        // this.heart.pump();
-    }
-
-    pushCandles(candles) {
-        candles.forEach(candle => {this.push(candle)});
-    }
-
-    _read() {}
-
+    // return promise, resolves once subscription is successful
     subscribe(pairs) {
-        const streamsStrings = this.ws.streams;
+        const streamsStrings = this.dataProvider.streams;
 
-        const streams = pairs.map(pair => {
-            return streamsStrings.kline(pair, '1m');
+        if(pairs.length) {
+            this.pairs.push(...pairs);
+        }
+
+        return new Promise((resolve, reject) => {
+            if(this.ws) {
+                const reqID = 4
+                const req = {
+                    method: "SUBSCRIBE",
+                    params: [
+                        streamsStrings.kline(pairs[0], "1m")
+                    ],
+                    id: reqID
+                };
+                this.ws.send(JSON.stringify(req));
+                this.ws.on('message', message => {
+                    const data = JSON.parse(message);
+                    if(data.id === reqID) {
+                        resolve();
+                    }
+                })
+            } else {
+                const streams = pairs.map(pair => {
+                    return streamsStrings.kline(pair, '1m');
+                });
+                this.dataProvider.onCombinedStream(streams)
+                    .then(ws => {
+                        this.ws = ws;
+                        ws.on('message', message => {
+                            const data = JSON.parse(message);
+                            this.push(data);
+                        });
+                        ws.on('error', error => {
+                            throw new Error("Websocket error!!!")
+                        });
+                        ws.on('close', () => {
+                            console.log("Websocket closed");
+                        });
+                        resolve();
+                        return ws;
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            }
         });
 
-        console.log(streams);
+        
 
-        return this.ws.onCombinedStream(streams, payload => {
-            let res = JSON.parse(payload);
-            this.push(res);
-        })
+        
 
 
-        // this.ws.onKline(pair, "1m", (payload) => {
+
+        // this.dataProvider.onKline(pair, "1m", (payload) => {
         //     let res = JSON.parse(payload);
         //     let kline = res.k;
 
@@ -90,6 +99,50 @@ class Realtime extends Readable {
         // });
 
     }
+
+
+        //remove this later
+        run() {
+            // this.fetcher.on('marketStart', () => {
+            //     this.emit('marketStart');
+            // });
+    
+            // this.fetcher.on('marketUpdate', () => {
+            //     this.emit('marketUpdate');
+            // });
+    
+            // this.fetcher.on('trades', trades => {
+            //     this.emit('trades', trades);
+            // });
+    
+            // this.heart.on('tick', () => {
+            //     // this.fetcher.fetch();
+            // });
+    
+            // this.fetcher.on('trades', (trades) => {
+            //     //this.candleManager.processTrades(trades);
+            //     console.log("RECIEVED TRADESSSSS")
+            // });
+    
+    
+            // // this.candleManager.on('candles', (candles) => {
+            //     //this.pushCandles(candles);
+            // // });
+    
+            // this.heart.pump();
+        }
+    
+    
+        setup() {
+            
+        }
+    
+    
+        pushCandles(candles) {
+            candles.forEach(candle => {this.push(candle)});
+        }
+    
+        _read() {}
 
 
     

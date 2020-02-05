@@ -16,67 +16,69 @@ class BinanceWS {
         }
     }
 
-    _setupWS(eventHandler, address, isCombined) {
-        if(this._sockets[address]) {
-            return this._sockets[address];
-        }
-        address = (isCombined ? this._combinedBaseUrl : this._baseURL) + address;
-        const ws = new WebSocket(address);
-        ws.on('message', (message) => {
-            eventHandler(message);
+    // returns a promise that resolves to the open websocket
+    _setupWS(address, isCombined) {
+        return new Promise((resolve, reject) => {
+            if(this._sockets[address]) {
+                return this._sockets[address];
+            }
+
+            address = (isCombined ? this._combinedBaseUrl : this._baseURL) + address;
+
+            const ws = new WebSocket(address);
+
+            ws.on('open', () => {
+                resolve(ws);
+            });
+
+            return ws;
         });
+
         
-        ws.on('error', (err) => {
-            console.log(err);
-        });
-
-        ws.on('close', () => {
-            console.log("Websocket closed");
-        });
-
-        return ws;
+        
+        
     }
 
-    onDepthUpdate(symbol, eventHandler) {
-        return this._setupWS(eventHandler, this.streams.depth(symbol))
+    onDepthUpdate(symbol) {
+        return this._setupWS(this.streams.depth(symbol))
     }
 
-    onDepthLevelUpdate(symbol, eventHandler) {
-        return this._setupWS(eventHandler, this.streams.depthLevel(symbol));
+    onDepthLevelUpdate(symbol) {
+        return this._setupWS(this.streams.depthLevel(symbol));
     }
 
-    onKline(symbol, interval, eventHandler) {
-        return this._setupWS(eventHandler, this.streams.kline(symbol, interval));
+    onKline(symbol, interval) {
+        return this._setupWS(this.streams.kline(symbol, interval));
     }
 
-    onAggTrade(symbol, eventHandler) {
-        return this._setupWS(eventHandler, this.streams.depth(symbol))
+    onAggTrade(symbol) {
+        return this._setupWS(this.streams.depth(symbol))
     }
 
-    onTrade(symbol, eventHandler) {
-        return this._setupWS(eventHandler, this.streams.depth(symbol));
+    onTrade(symbol) {
+        return this._setupWS(this.streams.depth(symbol));
     }
 
-    onTicker(symbol, eventHandler) {
-        return this._setupWS(eventHandler, this.streams.ticker(symbol));
+    onTicker(symbol) {
+        return this._setupWS(this.streams.ticker(symbol));
     }
 
-    onAllTickers(symbol, eventHandler) {
-        return this._setupWS(eventHandler, this.streams.allTickers(symbol));
+    onAllTickers(symbol) {
+        return this._setupWS(this.streams.allTickers(symbol));
     }
 
-    onUserData(binanceRest, eventHandler, interval = 60000) {
+    onUserData(binanceRest, interval = 60000) {
         return binanceRest.startUserDataStream()
             .then((response) => {
                 setInterval(() => {
                     binanceRest.keepAliveUserDataStream(response);
                 }, interval);
-                return this._setupWS(eventHandler, response.listenKey);
+                return this._setupWS(response.listenKey);
             })
     }
 
-    onCombinedStream(streams, eventHandler) {
-        return this._setupWS(eventHandler, streams.join('/'), true)
+    onCombinedStream(streams) {
+        return this._setupWS(streams.join('/'), true)
     }
 }
 

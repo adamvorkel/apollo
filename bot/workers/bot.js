@@ -2,6 +2,11 @@ const pipeline = require('../core/pipeline');
 
 let start = (config) => {
     let instance = new pipeline(config);
+    process.on('message', message => {
+        if(message.task === 'candle') {
+            instance.candle(message.candle)
+        }
+    })
 }
 
 process.send('ready');

@@ -13,7 +13,6 @@ class pipeline {
         this.setupMarket();
         this.subscribePlugins();
         this.startStream();
-        console.log(`Pipeline started`)
     }
 
     
@@ -71,6 +70,10 @@ class pipeline {
                 });
             }
         }
+    }
+
+    candle(candle) {
+        this.stream.write(candle);
     }
 
     startStream() {
