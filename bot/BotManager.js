@@ -4,132 +4,125 @@ const path = require('path');
 const { EventEmitter } = require('events');
 const Market = require('./core/markets/realtime');
 
+let lastBotID = 0;
+
 class BotManager extends EventEmitter {
     constructor() {
         super();
-        this.bots = {};
+
+        this.bots = [];
+        this.market;
+
+        this.setupMarket = this.setupMarket.bind(this);
+        this.dispatch = this.dispatch.bind(this);
+        this.createBot = this.createBot.bind(this);
+        this.startBot = this.startBot.bind(this);  
+        this.stopBot = this.stopBot.bind(this);
+        this.countBots = this.countBots.bind(this);
+        this.listBots = this.listBots.bind(this);
+        
+        this.setupMarket();
+    }
+
+    setupMarket() {
         this.market = new Market();
-        this.market.on('data', payload => {
-            if(payload.stream) {
-
-                let kline = payload.data.k;
-                let time = payload.data.E;
-                let candle = {
-                    isClosed: kline.x,
-                    time: time,
-                    start: kline.t,
-                    open: kline.o,
-                    close: kline.c,
-                    high: kline.h,
-                    low: kline.l,
-                    trades: kline.n,
-                    volume: kline.v
-                }
-
-                for(const botID in this.bots) {
-                    const bot = this.bots[botID];
-                    bot.instance.send({task: 'candle', candle: candle})
-                }
-            } else {
-                console.log(payload);
-            }
-        });
+        // dispatch candle
+        this.market.on('data', this.dispatch);
+        // subscription complete
+        this.market.on('subComplete', this.startBot);
     }
 
-    subscribeToStream(pair) {
-        return this.market.subscribe([pair]);
-    }
-
-    count() {
-        let count = 0;
-        for(const botID in this.bots) {
-            ++count;
+    dispatch(candle) {
+        //only send closed candles to bots
+        if(candle.isClosed) {
+            const bot = this.bots.find(bot => bot.pair === candle.pair);
+            bot.instance.send({task: 'candle', candle: candle})
         }
-        return count;
     }
 
-    generateUID() {
-        let uid;
-        do {
-            uid = (Math.round(Math.random() * 9) + 1);
-        } while (uid in this.bots);
-        return uid;
-    }
-
-    add(config) {
-        // create unique ID
-        const uid = this.generateUID();
-        const pair = config.watch.asset + config.watch.currency;
-
-        // fork a child bot
+    createBot(config) {
+        // fork a child process to run bot
         let child = fork(path.join(__dirname, "/workers/bot"));
-        child.on('message', (message) => {
-            // wait for bot to spin up
-            if(message === 'ready') {
-                // initiate a ws subscription for bots trading pair
-                this.subscribeToStream(pair)
-                    .then(() => {
-                        // once subscriptions confirmed, start the bot
-                        return child.send({
-                            task: 'start',
-                            config: config
-                        });
-                    });
-            // TODO:
-            // close ws for this bots pair then send exit
-            } else if(message === 'done') {
-                return child.send({
-                    task: 'exit'
-                });
-            }
+
+        //add bot to list
+        const id = ++lastBotID
+        const newBot = {
+            id: id,
+            pair: config.watch.asset + config.watch.currency,
+            mode: config.mode,
+            config: config,
+            start: null, 
+            instance: child
+        };
+        this.bots.push(newBot);
+
+        child.on('message', message => {
+            this.handleBotMessage(newBot, message);
         });
 
         child.on('exit', () => {
+            //close subscription
             console.log("child exited");
         });
+    }
 
-        //add bot to list
-        this.bots[uid] = {
-            uid: uid,
-            pair: config.watch.asset + config.watch.currency,
-            mode: config.mode,
-            start: Date.now(),
-            instance: child
-        };
+    startBot(pair) {
+        const waitingBot = this.bots.find(bot => bot.pair === pair);
 
-        // console.log(`Bot ${uid} running (${this.count()} running)`);
-        
-        this.emit('botStarted', {
-            id: uid,
-            config: config
+        waitingBot.start = Date.now();
+
+        waitingBot.instance.send({
+            task: 'start',
+            config: waitingBot.config
         });
     }
 
-    handleChildMessage(message) {
-
+    countBots() {
+        return this.bots.length;
     }
 
-    stop(id) {
-        if(!this.bots[id]) {
-            return false;
-        } else {
-            // TODO: stop bot
-            return true;
-        }
+    stopBot(id) {
+        //close subscription
+        // if(!this.bots[id]) {
+        //     return false;
+        // } else {
+        //     // TODO: stop bot
+        //     return true;
+        // }
     }
 
-    list() {
-        let list = [];
-        for(const uid in this.bots) {
-            list.push({
-                id: this.bots[uid].uid,
-                mode: this.bots[uid].mode,
-                start: this.bots[uid].start
-            });
-        };
+    listBots() {
+        // let list = [];
+        // for(const uid in this.bots) {
+        //     list.push({
+        //         id: this.bots[uid].uid,
+        //         mode: this.bots[uid].mode,
+        //         start: this.bots[uid].start
+        //     });
+        // };
 
-        return {
-            bots: list
+        // return {
+        //     bots: list
+        // }
+    }
+
+    handleBotMessage(bot, message) {
+        switch(message) {
+            case 'ready': {
+                // initiate a ws subscription for bots trading pair
+                this.market.subscribe(bot.pair);
+                break;
+            }
+            case 'done': {
+                // TODO:
+                // close ws for this bots pair then send exit
+                bot.instance.send({task: 'exit'});
+                break;
+            }
+            default: {
+                console.error('Unknown child process message');
+                process.exit(1);
+            }
         }
     }
 }

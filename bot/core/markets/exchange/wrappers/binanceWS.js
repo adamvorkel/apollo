@@ -32,11 +32,7 @@ class BinanceWS {
             });
 
             return ws;
-        });
-
-        
-        
-        
+        }); 
     }
 
     onDepthUpdate(symbol) {

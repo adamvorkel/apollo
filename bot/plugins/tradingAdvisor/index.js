@@ -36,7 +36,7 @@ class TradingAdvisor extends EventEmitter {
 
         this.lastCandleTime = candle.start;
 
-        console.log(output);
+        console.log(candle);
     }
 }
 

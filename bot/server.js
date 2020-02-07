@@ -4,7 +4,7 @@ const path = require('path');
 const BotManager = require('./BotManager');
 const WebSocketServer = require('ws').Server;
 
-const bots = new BotManager();
+const manager = new BotManager();
 
 // Create a bot instance for dev/testing
 // remove later
@@ -21,12 +21,15 @@ setTimeout(() => {
             key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
             secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
         },
+        tradingAdvisor: {
+            candleSize: 5
+        },
         strategy: {
             
         }
     };
     
-    bots.add(firstBotConfig);
+    manager.createBot(firstBotConfig);
 }, 0);
 
 setTimeout(() => {
@@ -46,7 +49,7 @@ setTimeout(() => {
         }
     };
     
-    bots.add(secondBotConfig);
+    manager.createBot(secondBotConfig);
 }, 6000);
 
 
@@ -63,7 +66,7 @@ app.use(express.urlencoded({extended: true}));
 // Endpoints
 
 app.get('/api/bots', (req, res) => {
-    res.json(bots.list())
+    res.json(manager.listBots())
 });
 
 app.post('/api/stopBot', (req, res) => {
@@ -72,7 +75,7 @@ app.post('/api/stopBot', (req, res) => {
         res.json({status:"failure"});
     } else {
         //we have an id, stop bot instance
-        const stopped = bots.stop(id);
+        const stopped = manager.stopBot(id);
         if(stopped) {
             res.json({id: id, status:"success"});
         } else {
@@ -127,7 +130,7 @@ const broadcast = (event, data) => {
     })
 }
 
-bots.on('botStarted', (payload) => {
+manager.on('botStarted', (payload) => {
     broadcast('botStarted', payload);
 });
 

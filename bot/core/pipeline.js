@@ -15,8 +15,6 @@ class pipeline {
         this.startStream();
     }
 
-    
-
     loadPlugins() {
         const pluginDir = util.dirs().plugins;
         let pluginMeta = require('../plugins/plugins');
@@ -64,9 +62,7 @@ class pipeline {
                             console.log(`${pluginSlug} wants to subscribe to ${sub.emitter} but it is not enabled`);
                             process.exit();
                         }
-                    }
-                    
-                    
+                    } 
                 });
             }
         }
@@ -94,12 +90,6 @@ class pipeline {
                 }
             }
         });
-
-        
-        // this.market.pipe(this.stream);
-        // this.market.on("end", () => {
-            // console.log("Market stream ended")
-        // })
     }
 }
 
