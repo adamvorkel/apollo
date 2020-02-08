@@ -71,6 +71,7 @@ class BotManager extends EventEmitter {
 
     startBot(sub) {
         const waitingBot = this.bots.find(bot => bot.pair === sub.pair);
+        console.log(`Starting bot ${waitingBot.pair}`)
 
         waitingBot.start = Date.now();
 

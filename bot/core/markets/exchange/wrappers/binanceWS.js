@@ -4,7 +4,6 @@ class BinanceWS {
     constructor() {
         this._baseURL = "wss://stream.binance.com:9443/ws/";
         this._combinedBaseUrl = 'wss://stream.binance.com:9443/stream?streams=';
-        this._sockets = {};
         this.streams = {
             depth: (symbol) => `${symbol.toLowerCase()}@depth`,
             depthLevel: (symbol, level) => `${symbol.toLowerCase()}@depth${level}`,
@@ -22,9 +21,6 @@ class BinanceWS {
     // returns a promise that resolves to the open websocket
     _setupWS(address, isCombined) {
         return new Promise((resolve, reject) => {
-            if(this._sockets[address]) {
-                return this._sockets[address];
-            }
 
             address = (isCombined ? this._combinedBaseUrl : this._baseURL) + address;
 
@@ -76,7 +72,7 @@ class BinanceWS {
             })
     }
 
-    onCombinedStream(streams) {
+    onCombinedStream(streams = []) {
         return this._setupWS(streams.join('/'), true)
     }
 }

@@ -1,9 +1,5 @@
 const Readable = require('stream').Readable;
-const Heart = require('./heart');
-const Fetcher = require('./fetcher');
 const BinanceWS = require('./exchange/wrappers/binanceWS');
-const CandleManager = require('./candleManager');
-const WebSocket = require('ws');
 
 let lastReq = 0;
 
@@ -15,32 +11,17 @@ class Realtime extends Readable {
         this.ws = null;
         this.activeSubs = [];
         this.pendingSubs = [];
+        this.connection = null;
     }
-
-
     
-    async connect(subs = []) {
-        const streamsStrings = this.dataProvider.streams;
+    async connect() {
         //connection already open, do nothing
         if(this.ws !== null)
             return;
-        
-        subs.forEach(sub => {
-            this.activeSubs.push(sub);
-        });
-
-        //create initial request string for ws connection url
-        const streams = subs.map(sub => {
-            return streamsStrings.kline(sub.pair, sub.candleSize);
-        });
 
         // establish the fresh ws connection
         try {
-            this.ws = await this.dataProvider.onCombinedStream(streams);
-
-            subs.forEach(sub => {
-                this.emit('subComplete', sub);
-            })
+            this.ws = await this.dataProvider.onCombinedStream();
 
             this.ws.on('message', message => {
                 this.handleMessage(message);
@@ -53,7 +34,6 @@ class Realtime extends Readable {
             });
         } catch(err) {
             console.error("WebSocket connection failure");
-            console.log(err)
             process.exit(1);
         }
     }
@@ -68,18 +48,19 @@ class Realtime extends Readable {
             candleSize: candleSize
         };
 
-        if(this.ws === null) {
-            await this.connect([pendingSub]);
-        } else {
-            //bookkeeping for establishing subscriptions
-            this.pendingSubs.push(pendingSub);
+        if(this.ws === null)
+            await this.connect();
 
-            this.ws.send(JSON.stringify({
-                method: "SUBSCRIBE",
-                params: [streamsStrings.kline(pendingSub.pair, pendingSub.candleSize)],
-                id: pendingSub.id
-            }));
-        }
+
+        //bookkeeping for establishing subscriptions
+        this.pendingSubs.push(pendingSub);
+
+        this.ws.send(JSON.stringify({
+            method: "SUBSCRIBE",
+            params: [streamsStrings.kline(pendingSub.pair, pendingSub.candleSize)],
+            id: pendingSub.id
+        }));
+
     }
 
     handleMessage(message) {
@@ -95,7 +76,7 @@ class Realtime extends Readable {
 
         // check if this is a candle -> process and push candle
         if(isCandle(payload)) 
-            return this.processCandle(payload);
+            return this.pushCandle(payload);
 
         if(isSubConfirm(payload))
             return this.processSubConfirm(payload.id);
@@ -106,7 +87,7 @@ class Realtime extends Readable {
         console.log(payload);
     }
 
-    processCandle(payload) {
+    pushCandle(payload) {
         //create candle object in format that bots can consume
         const kline = payload.data.k;
         const time = payload.data.E;
@@ -122,11 +103,6 @@ class Realtime extends Readable {
             trades: kline.n,
             volume: kline.v
         }
-        this.emit(`${candle.pair}_candle`, candle);
-        this.pushCandle(candle);
-    }
-
-    pushCandle(candle) {
         this.push(candle);
     }
 
