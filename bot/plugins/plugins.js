@@ -1,30 +1,7 @@
 let plugins = [
     {
-        name: "Candle Writer",
-        slug: "candleWriter",
-        enabled: true,
-        modes: [
-            "realtime",
-            "paper"
-        ],
-        // candleConsumer: true,
-        subscriptions: [
-            {
-                emitter: "market",
-                event: "trades",
-                handler: "processTrades"
-            },
-            {
-                emitter: "poopie",
-                event: "poop",
-                handler: "testPoop"
-            }
-        ]
-    },
-    
-    {
-        name: "Trading Advisor",
-        slug: "tradingAdvisor",
+        name: "Advisor",
+        slug: "advisor",
         enabled: true,
         emits: ["advice"],
         modes: [
@@ -63,9 +40,14 @@ let plugins = [
         emits: "poop",
         subscriptions: [
             {
-                emitter: "tradingAdvisor",
+                emitter: "advisor",
                 event: "advice",
                 handler: "processAdvice"
+            },
+            {
+                emitter: "advisor",
+                event: "stratReady",
+                handler: "stratReady"
             }
         ]
     }

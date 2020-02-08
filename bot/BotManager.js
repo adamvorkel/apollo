@@ -115,7 +115,7 @@ class BotManager extends EventEmitter {
         switch(message) {
             case 'ready': {
                 // initiate a ws subscription for bots trading pair
-                this.market.subscribe(bot.id, bot.pair, bot.config.tradingAdvisor.candleSize);
+                this.market.subscribe(bot.id, bot.pair, bot.config.advisor.candleSize);
                 break;
             }
             case 'done': {

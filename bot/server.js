@@ -21,13 +21,13 @@ setTimeout(() => {
             key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
             secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
         },
-        tradingAdvisor: {
+        advisor: {
             candleSize: "1m",
             strategy: {
                 name: 'myStrategy',
-                params: [
-                    
-                ]
+                params: {
+                    requiredHistory: 5
+                }
             }
         },
         
@@ -48,7 +48,7 @@ setTimeout(() => {
             key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
             secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
         },
-        tradingAdvisor: {
+        advisor: {
             candleSize: "1m",
             strategy: {
                 name: 'myStrategy',
