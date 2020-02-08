@@ -1,6 +1,6 @@
-const baseStrategy = require('../strategy');
+const strategy = require('../strategy');
 
-class MyStrategy extends baseStrategy {
+class MyStrategy extends strategy {
     constructor(stratSettings) {
         super(stratSettings);        
     }
