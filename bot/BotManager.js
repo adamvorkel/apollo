@@ -44,7 +44,8 @@ class BotManager extends EventEmitter {
         // fork a child process to run bot
         let child = fork(path.join(__dirname, "/workers/bot"));
 
-        console.log(child.pid);
+        // child process id
+        // console.log(child.pid);
 
         //add bot to list
         const id = ++lastBotID
@@ -70,9 +71,6 @@ class BotManager extends EventEmitter {
 
     startBot(sub) {
         const waitingBot = this.bots.find(bot => bot.pair === sub.pair);
-        console.log(this.bots.map(bot => {
-            return "Bot " + bot.id + " " + bot.pair
-        }))
 
         waitingBot.start = Date.now();
 

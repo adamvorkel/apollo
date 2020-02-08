@@ -22,7 +22,7 @@ setTimeout(() => {
             secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
         },
         tradingAdvisor: {
-            candleSize: "5m",
+            candleSize: "1m",
             strategy: {
                 name: 'myStrategy',
                 params: [
@@ -49,7 +49,7 @@ setTimeout(() => {
             secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
         },
         tradingAdvisor: {
-            candleSize: "5m",
+            candleSize: "1m",
             strategy: {
                 name: 'myStrategy',
                 params: [

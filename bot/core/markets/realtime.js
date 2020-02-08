@@ -68,8 +68,6 @@ class Realtime extends Readable {
             candleSize: candleSize
         };
 
-        console.log(`Gonna sub to ${pair} with candleSize ${candleSize}`);
-
         if(this.ws === null) {
             await this.connect([pendingSub]);
         } else {
@@ -81,11 +79,6 @@ class Realtime extends Readable {
                 params: [streamsStrings.kline(pendingSub.pair, pendingSub.candleSize)],
                 id: pendingSub.id
             }));
-
-            console.log("SUBS");
-            console.log(this.activeSubs);
-            console.log("PENDING SUBS")
-            console.log(this.pendingSubs)
         }
     }
 

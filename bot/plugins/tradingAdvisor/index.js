@@ -7,6 +7,7 @@ class TradingAdvisor extends EventEmitter {
         this.config = config;
 
         this.setup();
+        this.candles = [];
         this.lastCandleTime;
     }
 
@@ -29,14 +30,15 @@ class TradingAdvisor extends EventEmitter {
     }
 
     processCandle(candle) {
-        let output = `candle - Open: ${candle.open} | Close: ${candle.close} | Movement: ${candle.close - candle.open}`;
+        this.candles.push(candle);
+        let output = `candle #${this.candles.length} - Open: ${candle.open} | Close: ${candle.close} | Movement: ${candle.close - candle.open}`;
         if(this.lastCandleTime) {
             output += " | elapsed: " + ((candle.start - this.lastCandleTime) / 1000) + " s";
         }
 
         this.lastCandleTime = candle.start;
 
-        console.log(candle);
+        console.log(output);
     }
 }
 

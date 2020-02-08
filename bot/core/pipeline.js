@@ -66,10 +66,6 @@ class pipeline {
         }
     }
 
-    candle(candle) {
-        this.stream.write(candle);
-    }
-
     startStream() {
         let candleConsumers = {};
         for(const pluginSlug in this.plugins) {
@@ -80,6 +76,8 @@ class pipeline {
         }
 
         this.stream = new apolloStream(candleConsumers);
+        
+
         this.stream.on("finalize", () => {
             for(const pluginSlug in this.plugins) {
                 let plugin = this.plugins[pluginSlug];
@@ -88,6 +86,10 @@ class pipeline {
                 }
             }
         });
+    }
+
+    candle(candle) {
+        this.stream.write(candle);
     }
 }
 

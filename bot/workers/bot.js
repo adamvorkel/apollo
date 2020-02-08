@@ -5,6 +5,7 @@ let start = (config) => {
     
     process.on('message', message => {
         if(message.task === 'candle') {
+            console.log("BOT RECIEVED CANDLE")
             instance.candle(message.candle)
         }
     })
