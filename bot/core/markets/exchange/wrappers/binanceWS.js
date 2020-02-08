@@ -13,6 +13,9 @@ class BinanceWS {
             trade: (symbol) => `${symbol.toLowerCase()}@trade`,
             ticker: (symbol) => `${symbol.toLowerCase()}@ticker`,
             allTickers: () => '!ticker@arr'
+        };
+        this.candleSizes = {
+            
         }
     }
 

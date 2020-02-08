@@ -10,35 +10,36 @@ let lastReq = 0;
 class Realtime extends Readable {
     constructor(config) {
         super({objectMode: true});
+
         this.dataProvider = new BinanceWS();
-        this.pairs = [];
         this.ws = null;
-        this.pendingSubscriptions = [];
+        this.activeSubs = [];
+        this.pendingSubs = [];
     }
 
 
     
-    async connect(pairs = []) {
+    async connect(subs = []) {
         const streamsStrings = this.dataProvider.streams;
         //connection already open, do nothing
         if(this.ws !== null)
             return;
         
-        pairs.forEach(pair => {
-            this.pairs.push(pair);
+        subs.forEach(sub => {
+            this.activeSubs.push(sub);
         });
 
         //create initial request string for ws connection url
-        const streams = pairs.map(pair => {
-            return streamsStrings.kline(pair, '1m');
+        const streams = subs.map(sub => {
+            return streamsStrings.kline(sub.pair, sub.candleSize);
         });
 
         // establish the fresh ws connection
         try {
             this.ws = await this.dataProvider.onCombinedStream(streams);
 
-            pairs.forEach(pair => {
-                this.emit('subComplete', pair);
+            subs.forEach(sub => {
+                this.emit('subComplete', sub);
             })
 
             this.ws.on('message', message => {
@@ -58,22 +59,33 @@ class Realtime extends Readable {
     }
 
     // return promise, resolves once subscription is successful
-    async subscribe(pair) {
+    async subscribe(id, pair, candleSize) {
         const streamsStrings = this.dataProvider.streams;
 
-        if(this.ws === null) {
-            await this.connect([pair]);
-        } else {
-            const reqID = ++lastReq;
+        const pendingSub = {
+            id: id,
+            pair: pair,
+            candleSize: candleSize
+        };
 
+        console.log(`Gonna sub to ${pair} with candleSize ${candleSize}`);
+
+        if(this.ws === null) {
+            await this.connect([pendingSub]);
+        } else {
             //bookkeeping for establishing subscriptions
-            this.pendingSubscriptions.push({id: reqID, pair: pair});
+            this.pendingSubs.push(pendingSub);
 
             this.ws.send(JSON.stringify({
                 method: "SUBSCRIBE",
-                params: [streamsStrings.kline(pair, "1m")],
-                id: reqID
+                params: [streamsStrings.kline(pendingSub.pair, pendingSub.candleSize)],
+                id: pendingSub.id
             }));
+
+            console.log("SUBS");
+            console.log(this.activeSubs);
+            console.log("PENDING SUBS")
+            console.log(this.pendingSubs)
         }
     }
 
@@ -127,16 +139,20 @@ class Realtime extends Readable {
 
     processSubConfirm(reqId) {
         //find relevent pending subscription and pair it relates to
-        const pendingSubIndex = this.pendingSubscriptions.findIndex(({id}) => id === reqId);
-        const pendingSub = this.pendingSubscriptions[pendingSubIndex];
-        const pendingSubPair = pendingSub.pair;
+        const pendingSubIndex = this.pendingSubs.findIndex(({id}) => id === reqId);
+        const pendingSub = this.pendingSubs[pendingSubIndex];
+        const newSub = {
+            pair: pendingSub.pair, 
+            candleSize: pendingSub.candleSize
+        };
 
-        // add to subscribed pairs, remove from pending queue
-        this.pairs.push(pendingSubPair);
-        this.pendingSubscriptions.splice(pendingSubIndex, 1);
+        // add to subscribed pairs, 
+        this.activeSubs.push(newSub);
+        //remove from pending queue
+        this.pendingSubs.splice(pendingSubIndex, 1);
 
         // emit subscription confirmation, something like:
-        this.emit('subComplete', pendingSubPair);
+        this.emit('subComplete', newSub);
     }
 
     //remove this later

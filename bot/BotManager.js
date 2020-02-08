@@ -14,7 +14,7 @@ class BotManager extends EventEmitter {
         this.market;
 
         this.setupMarket = this.setupMarket.bind(this);
-        this.dispatch = this.dispatch.bind(this);
+        this.dispatchCandle = this.dispatchCandle.bind(this);
         this.createBot = this.createBot.bind(this);
         this.startBot = this.startBot.bind(this);  
         this.stopBot = this.stopBot.bind(this);
@@ -27,13 +27,13 @@ class BotManager extends EventEmitter {
     setupMarket() {
         this.market = new Market();
         // dispatch candle
-        this.market.on('data', this.dispatch);
-        // subscription complete
+        this.market.on('data', this.dispatchCandle);
+        // subscription complete, start appropriate bot
         this.market.on('subComplete', this.startBot);
     }
 
-    dispatch(candle) {
-        //only send closed candles to bots
+    dispatchCandle(candle) {
+        //send closed candles to appropriate bot
         if(candle.isClosed) {
             const bot = this.bots.find(bot => bot.pair === candle.pair);
             bot.instance.send({task: 'candle', candle: candle})
@@ -68,8 +68,11 @@ class BotManager extends EventEmitter {
         });
     }
 
-    startBot(pair) {
-        const waitingBot = this.bots.find(bot => bot.pair === pair);
+    startBot(sub) {
+        const waitingBot = this.bots.find(bot => bot.pair === sub.pair);
+        console.log(this.bots.map(bot => {
+            return "Bot " + bot.id + " " + bot.pair
+        }))
 
         waitingBot.start = Date.now();
 
@@ -79,9 +82,7 @@ class BotManager extends EventEmitter {
         });
     }
 
-    countBots() {
-        return this.bots.length;
-    }
+    
 
     stopBot(id) {
         //close subscription
@@ -91,6 +92,10 @@ class BotManager extends EventEmitter {
         //     // TODO: stop bot
         //     return true;
         // }
+    }
+
+    countBots() {
+        return this.bots.length;
     }
 
     listBots() {
@@ -112,7 +117,7 @@ class BotManager extends EventEmitter {
         switch(message) {
             case 'ready': {
                 // initiate a ws subscription for bots trading pair
-                this.market.subscribe(bot.pair);
+                this.market.subscribe(bot.id, bot.pair, bot.config.tradingAdvisor.candleSize);
                 break;
             }
             case 'done': {
