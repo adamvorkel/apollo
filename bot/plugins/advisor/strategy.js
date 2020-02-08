@@ -13,10 +13,7 @@ class Strategy extends EventEmitter {
         ++this.age;
 
         if(!this.ready) {
-            const percentWarmedUp = (this.age / this.requiredHistory) * 100;
-            console.log(`${percentWarmedUp}% warmed up...`)
             if(this.age >= this.requiredHistory) {
-                console.log("Emitting ready")
                 this.ready = true;
                 this.emit('stratReady');
             }

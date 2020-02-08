@@ -36,7 +36,7 @@ class BotManager extends EventEmitter {
         //send closed candles to appropriate bot
         if(candle.isClosed) {
             const bot = this.bots.find(bot => bot.pair === candle.pair);
-            bot.instance.send({task: 'candle', candle: candle})
+            bot.instance.send({task: 'candle', candle: candle});
         }
     }
 
