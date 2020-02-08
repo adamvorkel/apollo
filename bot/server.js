@@ -22,11 +22,15 @@ setTimeout(() => {
             secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
         },
         tradingAdvisor: {
-            candleSize: 5
+            candleSize: 5,
+            strategy: {
+                name: 'myStrategy',
+                params: [
+                    
+                ]
+            }
         },
-        strategy: {
-            
-        }
+        
     };
     
     manager.createBot(firstBotConfig);
@@ -44,9 +48,15 @@ setTimeout(() => {
             key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
             secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
         },
-        strategy: {
-            
-        }
+        tradingAdvisor: {
+            candleSize: 5,
+            strategy: {
+                name: 'myStrategy',
+                params: [
+                    
+                ]
+            }
+        },
     };
     
     manager.createBot(secondBotConfig);

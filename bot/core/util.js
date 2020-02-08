@@ -17,6 +17,9 @@ let util = {
 
         return _config;
     },
+    setConfig: (config) => {
+        _config = config;
+    },
     dirs: () => {
         let ROOT = path.join(__dirname, "/../");
         return {

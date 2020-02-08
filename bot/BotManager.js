@@ -44,6 +44,8 @@ class BotManager extends EventEmitter {
         // fork a child process to run bot
         let child = fork(path.join(__dirname, "/workers/bot"));
 
+        console.log(child.pid);
+
         //add bot to list
         const id = ++lastBotID
         const newBot = {

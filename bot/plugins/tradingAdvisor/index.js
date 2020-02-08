@@ -1,17 +1,17 @@
-const path = require('path');
 const EventEmitter = require('events');
-const strategyConfig = require('../../config').strategy;
 
 class TradingAdvisor extends EventEmitter {
-    constructor() {
+    constructor(config) {
         super();
         this.strategy = null;
-        this.setup(strategyConfig);
+        this.config = config;
+
+        this.setup();
         this.lastCandleTime;
     }
 
-    setup(config) {
-        this.strategy = this.loadStrategy(config);
+    setup() {
+        this.strategy = this.loadStrategy(this.config.strategy);
         this.strategy.on("stratWarmup", () => {this.emit("stratWarmup")});
         this.strategy.on("stratUpdate", update => this.emit("stratUpdate", update));
         this.strategy.on("advice", advice => this.emit("advice", advice));

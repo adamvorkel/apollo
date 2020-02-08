@@ -1,8 +1,6 @@
 const path = require('path');
 const util = require('./util');
-const config = util.getConfig();
 const apolloStream = require('./apolloStream');
-const fs = require('fs');
 
 class pipeline {
     constructor(config) {
@@ -27,7 +25,7 @@ class pipeline {
                     
                     let pluginType = require(pluginPath);
                     try {
-                        let pluginInstance = new pluginType();
+                        let pluginInstance = new pluginType(this.config[plugin.slug]);
                         pluginInstance.meta = plugin;
                         this.plugins[plugin.slug] = pluginInstance;
                     } catch(err) {
