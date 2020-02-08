@@ -21,8 +21,12 @@ class Strategy extends EventEmitter {
                 this.emit('stratReady');
             }
         } else {
-            console.log("Strategy ready " + candle.close);
+            this.check(candle);
         }
+    }
+
+    check(candle) {
+        throw new Error(`check(candle) must be implrmented in the strategy`);
     }
 }
 

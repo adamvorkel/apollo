@@ -3,7 +3,7 @@ let plugins = [
         name: "Advisor",
         slug: "advisor",
         enabled: true,
-        emits: ["advice"],
+        emits: ["advice", "stratReady"],
         modes: [
             "realtime",
             "paper"
@@ -43,11 +43,6 @@ let plugins = [
                 emitter: "advisor",
                 event: "advice",
                 handler: "processAdvice"
-            },
-            {
-                emitter: "advisor",
-                event: "stratReady",
-                handler: "stratReady"
             }
         ]
     }
