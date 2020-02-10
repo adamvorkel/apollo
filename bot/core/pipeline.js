@@ -1,6 +1,3 @@
-const path = require('path');
-const util = require('./util');
-
 class pipeline {
     constructor(config) {
         this.config = config;

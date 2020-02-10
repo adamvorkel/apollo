@@ -1,10 +1,8 @@
-// managers intances of bots
+// manages intances of bots
 const { fork } = require('child_process');
 const path = require('path');
 const { EventEmitter } = require('events');
 const Market = require('./core/markets/realtime');
-
-let lastBotID = 0;
 
 class BotManager extends EventEmitter {
     constructor() {
@@ -44,13 +42,9 @@ class BotManager extends EventEmitter {
         // fork a child process to run bot
         let child = fork(path.join(__dirname, "/workers/bot"));
 
-        // child process id
-        // console.log(child.pid);
-
         //add bot to list
-        const id = ++lastBotID
         const newBot = {
-            id: id,
+            id: child.pid,
             pair: config.watch.asset + config.watch.currency,
             mode: config.mode,
             config: config,
