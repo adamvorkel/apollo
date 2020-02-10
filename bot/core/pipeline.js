@@ -11,16 +11,13 @@ class pipeline {
     }
 
     loadPlugins() {
-        const pluginDir = util.dirs().plugins;
         let pluginMeta = require('../plugins/plugins');
         const mode = this.config.mode;
 
         pluginMeta.forEach(plugin => {
             if(plugin.enabled) {
                 if(plugin.modes.includes(mode)) {
-                    let pluginPath = path.join(pluginDir, plugin.slug);
-                    
-                    let pluginType = require(pluginPath);
+                    let pluginType = require('../plugins/' + plugin.slug);
                     try {
                         let pluginInstance = new pluginType(this.config[plugin.slug]);
                         pluginInstance.meta = plugin;
