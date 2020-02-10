@@ -1,6 +1,5 @@
 const path = require('path');
 const util = require('./util');
-const apolloStream = require('./apolloStream');
 
 class pipeline {
     constructor(config) {
@@ -10,7 +9,6 @@ class pipeline {
         this.loadPlugins();
         this.setupMarket();
         this.subscribePlugins();
-        this.startStream();
     }
 
     loadPlugins() {
@@ -66,30 +64,22 @@ class pipeline {
         }
     }
 
-    startStream() {
-        let candleConsumers = {};
+    candle(candle) {
         for(const pluginSlug in this.plugins) {
             let plugin = this.plugins[pluginSlug];
             if(plugin.meta.candleConsumer) {
-                candleConsumers[pluginSlug] = plugin;
+                plugin.processCandle(candle);
             }
         }
-
-        this.stream = new apolloStream(candleConsumers);
-        
-
-        this.stream.on("finalize", () => {
-            for(const pluginSlug in this.plugins) {
-                let plugin = this.plugins[pluginSlug];
-                if(plugin.finalize) {
-                    plugin.finalize();
-                }
-            }
-        });
     }
 
-    candle(candle) {
-        this.stream.write(candle);
+    finalize() {
+        for(const pluginSlug in this.plugins) {
+            let plugin = this.plugins[pluginSlug];
+            if(plugin.finalize) {
+                plugin.finalize();
+            }
+        }
     }
 }
 

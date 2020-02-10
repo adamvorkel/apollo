@@ -1,6 +1,4 @@
 const express = require('express');
-
-const path = require('path');
 const BotManager = require('./BotManager');
 const WebSocketServer = require('ws').Server;
 
