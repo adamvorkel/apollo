@@ -1,5 +1,3 @@
-
-
 class SMA {
     constructor(windowLen) {
         this.windowLen = windowLen;

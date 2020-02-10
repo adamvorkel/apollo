@@ -7,7 +7,6 @@ class pipeline {
         this.plugins = {};
 
         this.loadPlugins();
-        this.setupMarket();
         this.subscribePlugins();
     }
 
@@ -29,17 +28,9 @@ class pipeline {
                     } catch(err) {
                         console.log("EISH " + err);
                     }
-                    
-                    
                 }
             } 
         });
-    }
-
-    setupMarket() {
-        // const Market = require('./markets/realtime');
-        // this.market = new Market(this.config);
-        // this.market.run();
     }
 
     subscribePlugins() {
@@ -48,16 +39,12 @@ class pipeline {
             if(plugin.meta.subscriptions !== undefined) {
                 //handle each subscription
                 plugin.meta.subscriptions.forEach((sub) => {
-                    if(sub.emitter === "market") {
-                        // this.market.on(sub.event, plugin[sub.handler]);
+                    let emitter = this.plugins[sub.emitter];
+                    if(emitter) {
+                        emitter.on(sub.event, plugin[sub.handler])
                     } else {
-                        let emitter = this.plugins[sub.emitter];
-                        if(emitter) {
-                            emitter.on(sub.event, plugin[sub.handler])
-                        } else {
-                            console.log(`${pluginSlug} wants to subscribe to ${sub.emitter} but it is not enabled`);
-                            process.exit();
-                        }
+                        console.log(`${pluginSlug} wants to subscribe to ${sub.emitter} but it is not enabled`);
+                        process.exit();
                     } 
                 });
             }
