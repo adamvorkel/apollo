@@ -13,9 +13,6 @@ class BinanceWS {
             ticker: (symbol) => `${symbol.toLowerCase()}@ticker`,
             allTickers: () => '!ticker@arr'
         };
-        this.candleSizes = {
-            
-        }
     }
 
     // returns a promise that resolves to the open websocket
@@ -26,11 +23,10 @@ class BinanceWS {
 
             const ws = new WebSocket(address);
 
-            ws.on('open', () => {
+            ws.once('open', () => {
                 resolve(ws);
             });
 
-            return ws;
         }); 
     }
 
@@ -72,7 +68,7 @@ class BinanceWS {
             })
     }
 
-    onCombinedStream(streams = []) {
+    combinedStream(streams = []) {
         return this._setupWS(streams.join('/'), true)
     }
 }

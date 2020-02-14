@@ -8,57 +8,51 @@ class Realtime extends Readable {
         super({objectMode: true});
 
         this.dataProvider = new BinanceWS();
+        this.streams = {
+            depth: (symbol) => `${symbol.toLowerCase()}@depth`,
+            depthLevel: (symbol, level) => `${symbol.toLowerCase()}@depth${level}`,
+            kline: (symbol, interval) => `${symbol.toLowerCase()}@kline_${interval}`,
+            aggTrade: (symbol) => `${symbol.toLowerCase()}@aggTrade`,
+            trade: (symbol) => `${symbol.toLowerCase()}@trade`,
+            ticker: (symbol) => `${symbol.toLowerCase()}@ticker`,
+            allTickers: () => '!ticker@arr'
+        };
         this.ws = null;
-        this.activeSubs = [];
-        this.pendingSubs = [];
-        this.connection = null;
+        this.subs = [];
     }
     
     async connect() {
-        //connection already open, do nothing
-        if(this.ws !== null)
-            return;
-
         // establish the fresh ws connection
-        try {
-            this.ws = await this.dataProvider.onCombinedStream();
+        return new Promise((resolve, reject) => {
+            this.ws = new WebSocket("wss://stream.binance.com:9443/stream?streams=");
 
-            this.ws.on('message', message => {
-                this.handleMessage(message);
+            this.ws.on('open', () => {
+                resolve(ws);
             });
-            this.ws.on('error', error => {
-                throw new Error("Websocket error!!!")
-            });
-            this.ws.on('close', () => {
-                console.log("Websocket closed");
-            });
-        } catch(err) {
-            console.error("WebSocket connection failure");
-            process.exit(1);
-        }
+
+            this.ws.on('error', err => {
+                reject(err);
+            })
+        });
     }
 
     // return promise, resolves once subscription is successful
-    async subscribe(id, pair, candleSize) {
-        const streamsStrings = this.dataProvider.streams;
+    subscribe(id, pair, candleSize) {
 
-        const pendingSub = {
+        const sub = {
             id: id,
             pair: pair,
-            candleSize: candleSize
+            candleSize: candleSize,
+            status: 'pending'
         };
 
-        if(this.ws === null)
-            await this.connect();
-
-
         //bookkeeping for establishing subscriptions
-        this.pendingSubs.push(pendingSub);
+        this.subs.push(sub);
 
         this.ws.send(JSON.stringify({
             method: "SUBSCRIBE",
-            params: [streamsStrings.kline(pendingSub.pair, pendingSub.candleSize)],
-            id: pendingSub.id
+            params: [this.streams.kline(pair, candleSize)],
+            id: id
         }));
 
     }
@@ -80,11 +74,6 @@ class Realtime extends Readable {
 
         if(isSubConfirm(payload))
             return this.processSubConfirm(payload.id);
-
-        // this is not candle data
-        //TODO: Emit as some sort of update event
-        console.log("NON-CANDLE DATA FROM MARKET:");
-        console.log(payload);
     }
 
     pushCandle(payload) {
@@ -108,8 +97,9 @@ class Realtime extends Readable {
 
     processSubConfirm(reqId) {
         //find relevent pending subscription and pair it relates to
-        const pendingSubIndex = this.pendingSubs.findIndex(({id}) => id === reqId);
-        const pendingSub = this.pendingSubs[pendingSubIndex];
+        const subIndex = this.subs.findIndex(({id}) => id === reqId);
+        const pendingSub = this.sub[subIndex];
+        if(pendingSub.status === 'pending')
         const newSub = {
             pair: pendingSub.pair, 
             candleSize: pendingSub.candleSize
@@ -124,41 +114,7 @@ class Realtime extends Readable {
         this.emit('subComplete', newSub);
     }
 
-    //remove this later
-    run() {
-        // this.fetcher.on('marketStart', () => {
-        //     this.emit('marketStart');
-        // });
-
-        // this.fetcher.on('marketUpdate', () => {
-        //     this.emit('marketUpdate');
-        // });
-
-        // this.fetcher.on('trades', trades => {
-        //     this.emit('trades', trades);
-        // });
-
-        // this.heart.on('tick', () => {
-        //     // this.fetcher.fetch();
-        // });
-
-        // this.fetcher.on('trades', (trades) => {
-        //     //this.candleManager.processTrades(trades);
-        //     console.log("RECIEVED TRADESSSSS")
-        // });
-
-
-        // // this.candleManager.on('candles', (candles) => {
-        //     //this.pushCandles(candles);
-        // // });
-
-        // this.heart.pump();
-    }
-
     _read() {}
-
-
-    
 }
 
 module.exports = Realtime;

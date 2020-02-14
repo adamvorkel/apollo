@@ -26,6 +26,8 @@ let api = (botManager) => {
         console.log(`Apollo API listening on port ${port}`);
     });
 
+    console.log('run')
+
     /*-----------------*/
     // WSS server
     /*-----------------*/
