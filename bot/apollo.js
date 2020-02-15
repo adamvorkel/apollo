@@ -2,6 +2,8 @@ const config = require('./config');
 const server = require('./server');
 const BotManager = require('./BotManager');
 const Market = require('./core/markets/realtime');
+const {Channels} = require('./channels');
+
 // Create a bot instance for dev/testing
 // remove later
 let c1  = {
@@ -75,11 +77,13 @@ let c5  = {
     },
 };
 
-const manager = new BotManager();
-const market = new Market();
 
 
 const boot = async () => {
+
+    const channels = new Channels();
+    const market = new Market();
+
     try {
         await market.connect();
     } catch(err) {
@@ -87,11 +91,9 @@ const boot = async () => {
         process.exit(1);
     }
 
-    market.pipe(manager);
-};
+    channels.create(market, 'candle');
 
-boot().then(() => {
-    console.log("--- Boot complete ---");
+    const manager = new BotManager(market, channels);
 
     let b1 = manager.createBot(c1);
     market.subscribe(c1.watch.asset + c1.watch.currency);
@@ -108,7 +110,15 @@ boot().then(() => {
     let b5 = manager.createBot(c5);
     market.subscribe(c5.watch.asset + c5.watch.currency);
 
-    // const api = server(manager);
+    return manager;
+};
+
+boot().then((manager) => {
+    console.log("--- Boot complete ---");
+    const api = server(manager);
+    setInterval(() => {
+        api.broadcast('greeting', 'hello!')
+    }, 2000);
 });
 
 

@@ -75,7 +75,6 @@ class Realtime extends Readable {
         // it's a confirmation of a subscription
         else if(isSubConfirm(payload)) {
             this.pairs[this.pending[payload.id]].status = 'active';
-            console.log(this.pairs[this.pending[payload.id]])
             delete this.pending[payload.id];
         }
     }
@@ -97,7 +96,7 @@ class Realtime extends Readable {
             volume: kline.v
         };
 
-        this.push({type: 'candle', payload: candle});
+        this.push({type: candle.pair, payload: candle});
     }
 
     _read(candle) {}

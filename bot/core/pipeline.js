@@ -1,6 +1,5 @@
 class pipeline {
-    constructor(id, config) {
-        this.id = id;
+    constructor(config) {
         this.config = config;
         this.plugins = {};
 

@@ -1,25 +1,13 @@
 const EventEmitter = require('events');
 const BinanceRest = require('../../core/markets/exchange/wrappers/binance');
+const Broker = require('../../core/broker');
 
-class Portfolio {
-
-}
-
-class Broker extends EventEmitter {
-    constructor() {
-        super();
-    }
-
-    createOrder(order) {
-        console.log("BROKER CREATING ORDER", order);
-    }
-}
 
 class Trader extends EventEmitter {
     constructor(config) {
         super();
         this.config = config;
-        this.broker = new Broker();
+        this.broker = new Broker(config);
         this.price = null;
     }
 
