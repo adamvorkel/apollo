@@ -1,49 +1,56 @@
 // manages intances of bots
 const { fork } = require('child_process');
 const path = require('path');
-const { EventEmitter } = require('events');
+const { Writable } = require('stream');
 
 const pipeline = require('./core/pipeline');
 
-class BotManager extends EventEmitter {
+
+class Router {
     constructor() {
-        super();
+        this.routes = {};
+    }
 
-        this.bots = {};
-        this.market;
+    register(id, pair) {
+        if(!this.routes[pair])
+            this.routes[pair] = [];
+        
+        this.routes[pair].push(id);
+    }
 
-        this.setupMarket = this.setupMarket.bind(this);
-        this.dispatchCandle = this.dispatchCandle.bind(this);
+    getSubs(pair) {
+        return this.routes[pair] || [];
+    }
+};
+
+class BotManager extends Writable {
+    constructor() {
+        super({objectMode: true});
+        this.bots = new Map();
+        this.router = new Router();
         this.createBot = this.createBot.bind(this);
-        
-        this.setupMarket();
-    }
-
-    setupMarket() {
-        this.market = new Market();
-        // dispatch candle
-        
-    }
-
-    dispatchCandle(candle) {
-        //send closed candles to appropriate bot
-        if(candle.isClosed) {
-            const bot = this.bots.find(bot => bot.pair === candle.pair);
-            bot.instance.send({task: 'candle', candle: candle});
-        }
+        this.lastID = 0;
     }
 
     createBot(config) {
+        const nextID = ++this.lastID;
         //add bot to list
-        const newBot = new pipeline(config);
-        const pair = config.watch.asset + config.watch.currency
-        this.bots[pair] = newBot;  
+        console.log(`Starting ${config.mode} bot: ${config.watch.asset + config.watch.currency}`);
+        this.bots.set(nextID, new pipeline(nextID, config));
+        this.router.register(nextID, config.watch.asset + config.watch.currency);
     }
 
-
-    
-
-  
+    _write(data, encoding, callback) {
+        switch(data.type) {
+            case 'candle': {
+                const candle = data.payload;
+                const bots = this.router.getSubs(candle.pair);
+                bots.forEach(bot => this.bots.get(bot).candle(candle));
+                break;
+            }
+        }
+        callback();
+    }
 }
 
 module.exports = BotManager;

@@ -3,10 +3,7 @@ let plugins = [
         name: "Advisor",
         slug: "advisor",
         enabled: true,
-        modes: [
-            "realtime",
-            "paper"
-        ],
+        modes: ["realtime", "paper", "backtest"],
         candleConsumer: true,
         subscriptions: []
     },
@@ -14,7 +11,7 @@ let plugins = [
         name: "Trader",
         slug: "trader",
         enabled: true,
-        modes: ["realtime"],
+        modes: ["realtime", "paper", "backtest"],
         candleConsumer: true,
         subscriptions: [
             {

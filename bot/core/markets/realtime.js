@@ -1,13 +1,10 @@
 const Readable = require('stream').Readable;
-const BinanceWS = require('./exchange/wrappers/binanceWS');
-
-let lastReq = 0;
+const WebSocket = require('ws');
 
 class Realtime extends Readable {
     constructor(config) {
         super({objectMode: true});
 
-        this.dataProvider = new BinanceWS();
         this.streams = {
             depth: (symbol) => `${symbol.toLowerCase()}@depth`,
             depthLevel: (symbol, level) => `${symbol.toLowerCase()}@depth${level}`,
@@ -17,17 +14,24 @@ class Realtime extends Readable {
             ticker: (symbol) => `${symbol.toLowerCase()}@ticker`,
             allTickers: () => '!ticker@arr'
         };
+
         this.ws = null;
-        this.subs = [];
+        this.pending = {};
+        this.lastMessageID = 0;
+        this.pairs = [];
     }
     
-    async connect() {
+    connect() {
         // establish the fresh ws connection
         return new Promise((resolve, reject) => {
             this.ws = new WebSocket("wss://stream.binance.com:9443/stream?streams=");
 
             this.ws.on('open', () => {
-                resolve(ws);
+                resolve(this.ws);
+            });
+
+            this.ws.on('message', message => {
+                this.handleMessage(message);
             });
 
             this.ws.on('error', err => {
@@ -36,25 +40,23 @@ class Realtime extends Readable {
         });
     }
 
-    // return promise, resolves once subscription is successful
-    subscribe(id, pair, candleSize) {
+    subscribe(pair) {
+        // first subscribe request, add to combined websocket
+        if(!this.pairs[pair]) {
+            this.pairs[pair] = {
+                status: 'pending'
+            };
 
-        const sub = {
-            id: id,
-            pair: pair,
-            candleSize: candleSize,
-            status: 'pending'
-        };
+            const messageID = ++this.lastMessageID;
 
-        //bookkeeping for establishing subscriptions
-        this.subs.push(sub);
+            this.pending[messageID] = pair;
 
-        this.ws.send(JSON.stringify({
-            method: "SUBSCRIBE",
-            params: [this.streams.kline(pair, candleSize)],
-            id: id
-        }));
-
+            this.ws.send(JSON.stringify({
+                method: "SUBSCRIBE",
+                params: [this.streams.kline(pair, "1m")],
+                id: messageID
+            }));
+        }
     }
 
     handleMessage(message) {
@@ -62,24 +64,26 @@ class Realtime extends Readable {
             return m.data !== undefined && m.data.e == 'kline';
         };
 
-        const isSubConfirm = (m) => {
-            return m.result === null && m.id !== undefined && Number.isInteger(m.id);
-        };
+        const isSubConfirm = (m) => m.result === null && m.id !== undefined && Number.isInteger(m.id);
 
         const payload = JSON.parse(message);
 
         // check if this is a candle -> process and push candle
-        if(isCandle(payload)) 
-            return this.pushCandle(payload);
-
-        if(isSubConfirm(payload))
-            return this.processSubConfirm(payload.id);
+        if(isCandle(payload)) {
+            this.pushCandle(payload);
+        } 
+        // it's a confirmation of a subscription
+        else if(isSubConfirm(payload)) {
+            this.pairs[this.pending[payload.id]].status = 'active';
+            console.log(this.pairs[this.pending[payload.id]])
+            delete this.pending[payload.id];
+        }
     }
 
-    pushCandle(payload) {
+    pushCandle(rawCandle) {
         //create candle object in format that bots can consume
-        const kline = payload.data.k;
-        const time = payload.data.E;
+        const kline = rawCandle.data.k;
+        const time = rawCandle.data.E;
         const candle = {
             pair: kline.s,
             isClosed: kline.x,
@@ -91,30 +95,12 @@ class Realtime extends Readable {
             low: kline.l,
             trades: kline.n,
             volume: kline.v
-        }
-        this.push(candle);
-    }
-
-    processSubConfirm(reqId) {
-        //find relevent pending subscription and pair it relates to
-        const subIndex = this.subs.findIndex(({id}) => id === reqId);
-        const pendingSub = this.sub[subIndex];
-        if(pendingSub.status === 'pending')
-        const newSub = {
-            pair: pendingSub.pair, 
-            candleSize: pendingSub.candleSize
         };
 
-        // add to subscribed pairs, 
-        this.activeSubs.push(newSub);
-        //remove from pending queue
-        this.pendingSubs.splice(pendingSubIndex, 1);
-
-        // emit subscription confirmation, something like:
-        this.emit('subComplete', newSub);
+        this.push({type: 'candle', payload: candle});
     }
 
-    _read() {}
+    _read(candle) {}
 }
 
 module.exports = Realtime;

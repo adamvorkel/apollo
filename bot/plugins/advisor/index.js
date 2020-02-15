@@ -10,7 +10,7 @@ class Advisor extends EventEmitter {
     }
 
     setup() {
-        this.loadStrategy(this.config.strategy);
+        this.loadStrategy(this.config.advisor.strategy);
         this.strategy.on("stratReady", () => {this.emit("stratReady")});
         this.strategy.on("stratUpdate", update => this.emit("stratUpdate", update));
         this.strategy.on("advice", advice => this.emit("advice", advice));

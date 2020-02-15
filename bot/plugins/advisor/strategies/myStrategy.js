@@ -6,7 +6,7 @@ class MyStrategy extends strategy {
     }
 
     check(candle) {
-        console.log("MyStrategy can see the candles!")
+        // console.log("MyStrategy can see the candles!");
     }
 
     

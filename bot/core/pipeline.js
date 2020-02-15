@@ -1,5 +1,6 @@
 class pipeline {
-    constructor(config) {
+    constructor(id, config) {
+        this.id = id;
         this.config = config;
         this.plugins = {};
 
@@ -16,7 +17,7 @@ class pipeline {
                 if(plugin.modes.includes(mode)) {
                     let pluginType = require('../plugins/' + plugin.slug);
                     try {
-                        let pluginInstance = new pluginType(this.config[plugin.slug]);
+                        let pluginInstance = new pluginType(this.config);
                         pluginInstance.meta = plugin;
                         this.plugins[plugin.slug] = pluginInstance;
                     } catch(err) {

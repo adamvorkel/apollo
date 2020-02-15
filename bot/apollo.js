@@ -1,62 +1,114 @@
+const config = require('./config');
 const server = require('./server');
 const BotManager = require('./BotManager');
-const manager = new BotManager();
 const Market = require('./core/markets/realtime');
 // Create a bot instance for dev/testing
 // remove later
-
-let firstBotConfig  = {
-    launchUI: true,
+let c1  = {
     mode: "realtime",
     watch: {
-        exchange: "binance",
         currency: "USDT",
         asset: "BTC",
-        tickrate: 10,
-        key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
-        secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
     },
     advisor: {
-        candleSize: "1m",
         strategy: {
             name: 'myStrategy',
-            params: {
-                requiredHistory: 5
-            }
+            params: {requiredHistory: 5}
         }
     },
     
 };
 
-let secondBotConfig  = {
-    launchUI: true,
+let c2  = {
     mode: "realtime",
     watch: {
-        exchange: "binance",
         currency: "BTC",
         asset: "BNB",
-        tickrate: 10,
-        key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
-        secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73"
     },
     advisor: {
-        candleSize: "1m",
         strategy: {
             name: 'myStrategy',
-            params: [
-                
-            ]
+            params: []
         }
     },
 };
 
+let c3  = {
+    mode: "realtime",
+    watch: {
+        currency: "BTC",
+        asset: "EOS",
+    },
+    advisor: {
+        strategy: {
+            name: 'myStrategy',
+            params: []
+        }
+    },
+};
+
+let c4  = {
+    mode: "paper",
+    watch: {
+        currency: "BTC",
+        asset: "EOS",
+    },
+    advisor: {
+        strategy: {
+            name: 'myStrategy',
+            params: []
+        }
+    },
+};
+
+let c5  = {
+    mode: "paper",
+    watch: {
+        currency: "BTC",
+        asset: "XRP",
+    },
+    advisor: {
+        strategy: {
+            name: 'myStrategy',
+            params: []
+        }
+    },
+};
+
+const manager = new BotManager();
 const market = new Market();
-market.connect().then(connection => {
-    //now we can add the api
-    const api = server(manager);
-    //now we can add bots
-    manager.createBot(firstBotConfig);
-    manager.createBot(secondBotConfig);
+
+
+const boot = async () => {
+    try {
+        await market.connect();
+    } catch(err) {
+        console.error("Failed to connect to market");
+        process.exit(1);
+    }
+
+    market.pipe(manager);
+};
+
+boot().then(() => {
+    console.log("--- Boot complete ---");
+
+    let b1 = manager.createBot(c1);
+    market.subscribe(c1.watch.asset + c1.watch.currency);
+    
+    let b2 = manager.createBot(c2);
+    market.subscribe(c2.watch.asset + c2.watch.currency);
+
+    let b3 = manager.createBot(c3);
+    market.subscribe(c3.watch.asset + c3.watch.currency);
+
+    let b4 = manager.createBot(c4);
+    market.subscribe(c4.watch.asset + c4.watch.currency);
+
+    let b5 = manager.createBot(c5);
+    market.subscribe(c5.watch.asset + c5.watch.currency);
+
+    // const api = server(manager);
 });
 
 

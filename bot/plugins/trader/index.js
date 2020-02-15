@@ -16,15 +16,16 @@ class Broker extends EventEmitter {
 }
 
 class Trader extends EventEmitter {
-    constructor() {
+    constructor(config) {
         super();
+        this.config = config;
         this.broker = new Broker();
         this.price = null;
     }
 
     processCandle(candle) {
         this.price = candle.close;
-        console.log(`Traders current price is ${this.price}`)
+        console.log(`${this.config.watch.asset} Trader:  ${this.price} ${this.config.watch.currency}`)
     }
 
     processAdvice(advice) {

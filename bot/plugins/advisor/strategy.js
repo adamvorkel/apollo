@@ -23,7 +23,7 @@ class Strategy extends EventEmitter {
     }
 
     check(candle) {
-        throw new Error(`check(candle) must be implrmented in the strategy`);
+        throw new Error(`check(candle) must be implemented in the strategy`);
     }
 }
 
