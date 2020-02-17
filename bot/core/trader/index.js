@@ -1,12 +1,9 @@
 const EventEmitter = require('events');
-const Broker = require('../broker');
-
 
 class Trader extends EventEmitter {
     constructor(config) {
         super();
         this.config = config;
-        this.broker = new Broker(config);
         this.price = null;
     }
 
@@ -18,7 +15,6 @@ class Trader extends EventEmitter {
     processAdvice(advice) {
         console.log("TRADER RECIEVED ADVICE", advice);
         const order = {};
-        this.broker.createOrder(order);
     }
 }
 

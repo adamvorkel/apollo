@@ -30,7 +30,9 @@ class Controller extends EventEmitter {
 
     createBot(config) {
         const pair = `${config.watch.asset}${config.watch.currency}`;
+
         let newBot = this.bots.create(config);
+
         this.market.subscribe(config.watch.asset + config.watch.currency);
         this.channels.subscribe(newBot.candle.bind(newBot), 'candle', pair);
     }

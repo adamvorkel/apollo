@@ -1,11 +1,10 @@
-const advisor = require('./advisor');
-const trader = require('./trader');
+
 
 class pipeline {
-    constructor(config) {
+    constructor(config, advisor, trader) {
         this.config = config;
-        this.advisor = new advisor(config);
-        this.trader = new trader(config);
+        this.advisor = advisor;
+        this.trader = trader;
         this.plugins = {};
 
         this.setup();
@@ -14,9 +13,8 @@ class pipeline {
     }
 
     setup() {
-        this.advisor.on('advice', advice => {
-            this.trader(processAdvice);
-        })
+        // trader acts on advisors advice
+        this.advisor.on('advice', this.trader.processAdvice);
     }
 
     loadPlugins() {

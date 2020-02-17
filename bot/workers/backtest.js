@@ -8,7 +8,9 @@ const run = (config) => {
     let market = new BacktestMarket();
 
     console.log('running backtest')
-    new pipeline(config);
+    const advisor = require('../core/advisor');
+    const trader = require('../core/trader');
+    new pipeline(config, new advisor(config), new trader(config));
 }
 
 
