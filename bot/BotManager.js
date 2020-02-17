@@ -1,26 +1,22 @@
 // manages intances of bots
-const { fork } = require('child_process');
-const path = require('path');
-const { Writable } = require('stream');
-
 const pipeline = require('./core/pipeline');
 
 
 class BotManager {
-    constructor(market, channels) {
-        this.market = market;
+    constructor(channels) {
         this.channels = channels;
         this.bots = new Map();
-        this.createBot = this.createBot.bind(this);
-        this.lastID = 0;
+        this.create = this.create.bind(this);
     }
 
-    createBot(config) {
+    create(config) {
+        const pair = `${config.watch.asset}${config.watch.currency}`;
+        const mode = config.mode;
+        const id = `${pair}-${mode}`;
         // create new bot
         let newBot = new pipeline(config);
-        //add bot to list
-        this.bots.set(++this.lastID, newBot);
-        this.channels.subscribe(newBot.candle.bind(newBot), 'candle', config.watch.asset + config.watch.currency);
+        this.bots.set(id, newBot);
+        return newBot;
     }
 }
 

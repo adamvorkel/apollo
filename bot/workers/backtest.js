@@ -1,24 +1,28 @@
 const pipeline = require('../core/pipeline');
+const BacktestMarket = require('../core/markets/backtest');
 
-let start = (config) => {
-    let instance = new pipeline(config);
-    
-    process.on('message', message => {
-        if(message.task === 'candle') {
-            instance.candle(message.candle);
-        }
-    })
+process.send({type: 'status', payload: 'ready'});
+
+const run = (config) => {
+    // create market
+    let market = new BacktestMarket();
+
+    console.log('running backtest')
+    new pipeline(config);
 }
 
-process.send('ready');
 
 process.on('message', (message) => {
     if(message.task === 'start') {
-        start(message.config);
+        run(message.config);
     } else if(message.task === 'exit') {
         process.exit(0);
     }
 });
+
+setTimeout(() => {
+    process.send({type: 'status', payload: 'done'});
+}, 10000);
 
 process.on('disconnect', () => {
     console.log(`Disconnect`);
@@ -27,11 +31,11 @@ process.on('disconnect', () => {
 
 process.on('unhandledRejection', message => {
     console.error('unhandledRejection', message);
-    process.send({type: 'error', message: message});
+    process.send({type: 'error', payload: message});
 });
 
 process.on('uncaughtException', e => {
     console.error('uncaughtException', e);
-    process.send({type: 'error', error: e});
+    process.send({type: 'error', payload: e});
     process.exit(1);
 });
