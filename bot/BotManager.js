@@ -1,4 +1,8 @@
-// manages intances of bots
+/**
+ * 
+ * Manages intances of bots
+ * 
+ */
 const pipeline = require('./core/pipeline');
 
 

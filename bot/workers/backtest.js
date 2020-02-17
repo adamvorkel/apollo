@@ -1,5 +1,5 @@
 const pipeline = require('../core/pipeline');
-const BacktestMarket = require('../core/markets/backtest');
+const BacktestMarket = require('../markets/backtest');
 
 process.send({type: 'status', payload: 'ready'});
 

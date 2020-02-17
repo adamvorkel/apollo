@@ -1,10 +1,22 @@
+const advisor = require('./advisor');
+const trader = require('./trader');
+
 class pipeline {
     constructor(config) {
         this.config = config;
+        this.advisor = new advisor(config);
+        this.trader = new trader(config);
         this.plugins = {};
 
+        this.setup();
         this.loadPlugins();
         this.subscribePlugins();
+    }
+
+    setup() {
+        this.advisor.on('advice', advice => {
+            this.trader(processAdvice);
+        })
     }
 
     loadPlugins() {
@@ -46,6 +58,8 @@ class pipeline {
     }
 
     candle(candle) {
+        this.advisor.processCandle(candle);
+        this.trader.processCandle(candle);
         for(const pluginSlug in this.plugins) {
             let plugin = this.plugins[pluginSlug];
             if(plugin.meta.candleConsumer) {

@@ -1,6 +1,5 @@
 const EventEmitter = require('events');
-const BinanceRest = require('../../core/markets/exchange/wrappers/binance');
-const Broker = require('../../core/broker');
+const Broker = require('../broker');
 
 
 class Trader extends EventEmitter {
