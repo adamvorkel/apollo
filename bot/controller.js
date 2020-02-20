@@ -1,5 +1,4 @@
 const {EventEmitter} = require('events');
-const {Channels} = require('./channels');
 const botManager = require('./botManager');
 const backtestManager = require('./BacktestManager');
 const market = require('./markets/realtime');
@@ -8,10 +7,9 @@ const market = require('./markets/realtime');
 class Controller extends EventEmitter {
     constructor(config) {
         super();
-        this.channels = new Channels();
         this.accountStream = null;
         this.market = new market();
-        this.bots = new botManager(this.channels);
+        this.bots = new botManager();
         this.backtests = new backtestManager();
 
         this.backtests.on('backtestComplete', results => {
@@ -25,16 +23,22 @@ class Controller extends EventEmitter {
         } catch(err) {
             process.exit(1);
         }
-        this.channels.create(this.market, 'candle');
     }
 
-    createBot(config) {
+    async createBot(config) {
         const pair = `${config.watch.asset}${config.watch.currency}`;
 
-        let newBot = this.bots.create(config);
-
-        this.market.subscribe(config.watch.asset + config.watch.currency);
-        this.channels.subscribe(newBot.candle.bind(newBot), 'candle', pair);
+        try {
+            // Create the new bot
+            let newBot = this.bots.create(config);
+            // Get a pair stream for the new bot
+            let stream = await this.market.subscribe(pair);
+            // Connect the stream to the new bot
+            stream.pipe(newBot);
+        } catch(err) {
+            console.log(`Failed to create a bot for pair ${pair}`);
+            return;
+        }
     }
 
     createBacktest(config) {

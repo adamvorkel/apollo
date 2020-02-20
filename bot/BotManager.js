@@ -7,8 +7,7 @@ const pipeline = require('./core/pipeline');
 
 
 class BotManager {
-    constructor(channels) {
-        this.channels = channels;
+    constructor() {
         this.bots = new Map();
         this.create = this.create.bind(this);
     }
@@ -21,9 +20,10 @@ class BotManager {
         const advisor = require('./core/advisor');
         const trader = require('./core/trader');
 
+        
+
         // create new bot
         let newBot = new pipeline(config, new advisor(config), new trader(config));
-
         
         this.bots.set(id, newBot);
         return newBot;

@@ -13,11 +13,15 @@ const boot = async (config) => {
     await app.connectToMarket();
     
     // let b1 = controller.createBot(c1);
-    // let b2 = controller.createBot(c2);
-    // let b3 = controller.createBot(c3);
-    // let b4 = controller.createBot(c4);
+    
+    let b3 = app.createBot(c3);
+    let b4 = app.createBot(c4);
+    setTimeout(() => {
+        console.log('creating bot 2')
+        let b2 = app.createBot(c2);
+    },5000);
     let b5 = app.createBot(c5);
-    let b6 = app.createBacktest(c6);
+    // let b6 = app.createBacktest(c6);
 
     return app;
 };

@@ -1,9 +1,8 @@
 const Readable = require('stream').Readable;
 const WebSocket = require('ws');
 
-class Realtime extends Readable {
-    constructor(config) {
-        super({objectMode: true});
+class Realtime {
+    constructor() {
 
         this.streams = {
             depth: (symbol) => `${symbol.toLowerCase()}@depth`,
@@ -16,9 +15,8 @@ class Realtime extends Readable {
         };
 
         this.ws = null;
-        this.pending = {};
         this.lastMessageID = 0;
-        this.pairs = [];
+        this.pairs = {};
     }
     
     connect() {
@@ -41,30 +39,43 @@ class Realtime extends Readable {
     }
 
     subscribe(pair) {
-        // first subscribe request, add to combined websocket
-        if(!this.pairs[pair]) {
-            this.pairs[pair] = {
-                status: 'pending'
-            };
+        /**
+         * TODO : handle subscription confirm checking and promises more reliably
+         * does a confirm response from the ws always pertain to the last request pair?
+         */
+        return new Promise((resolve, reject) => {
+            // first subscribe request, add to combined websocket
+            if(!this.pairs[pair]) {
+                this.pairs[pair] =  new Readable({objectMode: true, read: (chunk) => {}});
 
-            const messageID = ++this.lastMessageID;
+                const messageID = ++this.lastMessageID;
 
-            this.pending[messageID] = pair;
+                this.ws.send(JSON.stringify({
+                    method: "SUBSCRIBE",
+                    params: [this.streams.kline(pair, "1m")],
+                    id: messageID
+                }));
+                
+                const isSubConfirm = (m) => m.result === null && m.id !== undefined && Number.isInteger(m.id);
+                const handleSubscribeConfirm = (payload) => {
+                    const message = JSON.parse(payload);
+                    if(isSubConfirm(message)) {
+                        resolve(this.pairs[pair]);
+                    }
 
-            this.ws.send(JSON.stringify({
-                method: "SUBSCRIBE",
-                params: [this.streams.kline(pair, "1m")],
-                id: messageID
-            }));
-        }
+                }
+
+                this.ws.on('message', handleSubscribeConfirm);
+            } else {
+                resolve(this.pairs[pair]);
+            }
+        });
     }
 
     handleMessage(message) {
         const isCandle = (m) => {
-            return m.data !== undefined && m.data.e == 'kline';
+            return m.data && m.data.e == 'kline';
         };
-
-        const isSubConfirm = (m) => m.result === null && m.id !== undefined && Number.isInteger(m.id);
 
         const payload = JSON.parse(message);
 
@@ -72,11 +83,6 @@ class Realtime extends Readable {
         if(isCandle(payload)) {
             this.pushCandle(payload);
         } 
-        // it's a confirmation of a subscription
-        else if(isSubConfirm(payload)) {
-            this.pairs[this.pending[payload.id]].status = 'active';
-            delete this.pending[payload.id];
-        }
     }
 
     pushCandle(rawCandle) {
@@ -96,10 +102,8 @@ class Realtime extends Readable {
             volume: kline.v
         };
 
-        this.push({type: candle.pair, payload: candle});
+        this.pairs[candle.pair].push(candle);
     }
-
-    _read(candle) {}
 }
 
 module.exports = Realtime;

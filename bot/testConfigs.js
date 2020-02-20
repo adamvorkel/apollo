@@ -31,7 +31,7 @@ let c3  = {
     mode: "realtime",
     watch: {
         currency: "BTC",
-        asset: "EOS",
+        asset: "ZEC",
     },
     advisor: {
         strategy: {

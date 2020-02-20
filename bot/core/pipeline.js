@@ -1,7 +1,9 @@
+const { Writable } = require('stream');
 
-
-class pipeline {
+class pipeline extends Writable {
     constructor(config, advisor, trader) {
+        super({objectMode: true});
+
         this.config = config;
         this.advisor = advisor;
         this.trader = trader;
@@ -24,13 +26,13 @@ class pipeline {
         pluginMeta.forEach(plugin => {
             if(plugin.enabled) {
                 if(plugin.modes.includes(mode)) {
-                    let pluginType = require('../plugins/' + plugin.slug);
                     try {
+                        let pluginType = require('../plugins/' + plugin.slug);
                         let pluginInstance = new pluginType(this.config);
                         pluginInstance.meta = plugin;
                         this.plugins[plugin.slug] = pluginInstance;
                     } catch(err) {
-                        console.log("EISH " + err);
+                        console.error(`Unable to load ${plugin.name} plugin`);
                     }
                 }
             } 
@@ -55,7 +57,7 @@ class pipeline {
         }
     }
 
-    candle(candle) {
+    _write(candle, encoding, callback) {
         this.advisor.processCandle(candle);
         this.trader.processCandle(candle);
         for(const pluginSlug in this.plugins) {
@@ -64,6 +66,7 @@ class pipeline {
                 plugin.processCandle(candle);
             }
         }
+        callback();
     }
 
     finalize() {
