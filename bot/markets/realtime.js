@@ -3,73 +3,98 @@ const WebSocket = require('ws');
 
 class Realtime {
     constructor() {
-
-        this.streams = {
-            depth: (symbol) => `${symbol.toLowerCase()}@depth`,
-            depthLevel: (symbol, level) => `${symbol.toLowerCase()}@depth${level}`,
-            kline: (symbol, interval) => `${symbol.toLowerCase()}@kline_${interval}`,
-            aggTrade: (symbol) => `${symbol.toLowerCase()}@aggTrade`,
-            trade: (symbol) => `${symbol.toLowerCase()}@trade`,
-            ticker: (symbol) => `${symbol.toLowerCase()}@ticker`,
-            allTickers: () => '!ticker@arr'
-        };
-
-        this.ws = null;
+        this.ws = this.connect();
         this.lastMessageID = 0;
         this.pairs = {};
     }
     
-    connect() {
-        // establish the fresh ws connection
+    connect() { 
         return new Promise((resolve, reject) => {
-            this.ws = new WebSocket("wss://stream.binance.com:9443/stream?streams=");
+            let ws = new WebSocket("wss://stream.binance.com:9443/stream?streams=");
 
-            this.ws.on('open', () => {
-                resolve(this.ws);
+            ws.on('open', () => {
+                console.log('websocket connection complete');
+                // establish the fresh ws connection
+                resolve(ws);
             });
 
-            this.ws.on('message', message => {
+            ws.on('message', message => {
                 this.handleMessage(message);
             });
 
-            this.ws.on('error', err => {
+            ws.on('close', (code, reason) => {
+                console.error(`websocket closed with code: ${code}, reason: ${reason}`);
+                this.reconnect();
+            });
+
+            ws.on('error', err => {
                 reject(err);
-            })
+            });
+            
         });
     }
 
-    subscribe(pair) {
+    async reconnect() {
+        let pairs = (this.pairs) ? Object.keys(this.pairs) : [];
+        let wait = (ms) => {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve();
+                }, ms)
+            });
+        };
+
+        this.ws = null;
+        const maxAttempts = 10;
+        let attempt = 0;
+
+        while(attempt < maxAttempts && !this.ws) {
+            console.log(`Connection attempt ${attempt}`)
+            try {
+                this.ws = await this.connect();
+                pairs.forEach(async pair => {
+                    await this._subscribe(pair);
+                });
+            } catch(err) {
+                console.error(`Failed to connect to websocket...`);
+                await wait(1000);
+            }
+            ++attempt;
+        }
+
+        if(!this.ws) {
+            console.error(`Unable to establish connection to websocket...`);
+            process.exit(1);
+        }
+        
+    }
+
+    async getStream(pair) {
         /**
          * TODO : handle subscription confirm checking and promises more reliably
          * does a confirm response from the ws always pertain to the last request pair?
          */
-        return new Promise((resolve, reject) => {
-            // first subscribe request, add to combined websocket
-            if(!this.pairs[pair]) {
-                this.pairs[pair] =  new Readable({objectMode: true, read: (chunk) => {}});
 
-                const messageID = ++this.lastMessageID;
+        // first subscribe request, create stream and subscribe over ws
+        if(!this.pairs[pair]) {
+            this.pairs[pair] =  new Readable({objectMode: true, read: (chunk) => {}});
+            this._subscribe(pair);
+        }
 
-                this.ws.send(JSON.stringify({
-                    method: "SUBSCRIBE",
-                    params: [this.streams.kline(pair, "1m")],
-                    id: messageID
-                }));
-                
-                const isSubConfirm = (m) => m.result === null && m.id !== undefined && Number.isInteger(m.id);
-                const handleSubscribeConfirm = (payload) => {
-                    const message = JSON.parse(payload);
-                    if(isSubConfirm(message)) {
-                        resolve(this.pairs[pair]);
-                    }
+        return this.pairs[pair];
+    }
 
-                }
+    async _subscribe(pair) {
+        let ws = await this.ws;
 
-                this.ws.on('message', handleSubscribeConfirm);
-            } else {
-                resolve(this.pairs[pair]);
-            }
-        });
+        let kline = (symbol, interval) => `${symbol.toLowerCase()}@kline_${interval}`;
+        const messageID = ++this.lastMessageID;
+
+        ws.send(JSON.stringify({
+            method: "SUBSCRIBE",
+            params: [kline(pair, "1m")],
+            id: messageID
+        }));
     }
 
     handleMessage(message) {
@@ -82,7 +107,7 @@ class Realtime {
         // check if this is a candle -> process and push candle
         if(isCandle(payload)) {
             this.pushCandle(payload);
-        } 
+        }
     }
 
     pushCandle(rawCandle) {
@@ -105,5 +130,15 @@ class Realtime {
         this.pairs[candle.pair].push(candle);
     }
 }
+
+// this.streams = {
+//     depth: (symbol) => `${symbol.toLowerCase()}@depth`,
+//     depthLevel: (symbol, level) => `${symbol.toLowerCase()}@depth${level}`,
+//     kline: (symbol, interval) => `${symbol.toLowerCase()}@kline_${interval}`,
+//     aggTrade: (symbol) => `${symbol.toLowerCase()}@aggTrade`,
+//     trade: (symbol) => `${symbol.toLowerCase()}@trade`,
+//     ticker: (symbol) => `${symbol.toLowerCase()}@ticker`,
+//     allTickers: () => '!ticker@arr'
+// };
 
 module.exports = Realtime;

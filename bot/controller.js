@@ -17,14 +17,6 @@ class Controller extends EventEmitter {
         })
     }
 
-    async connectToMarket() {
-        try {
-            await this.market.connect();
-        } catch(err) {
-            process.exit(1);
-        }
-    }
-
     async createBot(config) {
         const pair = `${config.watch.asset}${config.watch.currency}`;
 
@@ -32,17 +24,17 @@ class Controller extends EventEmitter {
             // Create the new bot
             let newBot = this.bots.create(config);
             // Get a pair stream for the new bot
-            let stream = await this.market.subscribe(pair);
+            let stream = await this.market.getStream(pair);
             // Connect the stream to the new bot
             stream.pipe(newBot);
         } catch(err) {
-            console.log(`Failed to create a bot for pair ${pair}`);
+            console.log(`Failed to create a bot for pair ${pair}`, err);
             return;
         }
     }
 
-    createBacktest(config) {
-        this.backtests.create(config);
+    async createBacktest(config) {
+        let backtestProcess = await this.backtests.create(config);
     }
 }
 

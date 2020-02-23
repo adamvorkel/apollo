@@ -20,8 +20,6 @@ class BotManager {
         const advisor = require('./core/advisor');
         const trader = require('./core/trader');
 
-        
-
         // create new bot
         let newBot = new pipeline(config, new advisor(config), new trader(config));
         

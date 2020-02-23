@@ -27,7 +27,9 @@ class Advisor extends EventEmitter {
     }
 
     processCandle(candle) {
-        this.strategy.tick(candle);
+        if(candle.isClosed) {
+            this.strategy.tick(candle);
+        }
     }
 }
 

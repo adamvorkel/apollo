@@ -4,13 +4,20 @@ class Strategy extends EventEmitter {
     constructor(stratSettings) {
         super();
 
+        console.log(stratSettings)
+
         this.age = 0;
         this.ready = false;
+        this.indicators = {};
         this.requiredHistory = stratSettings.params.requiredHistory || 1;
     }
 
     tick(candle) {
         ++this.age;
+
+        for(const [name, indicator] of this.indicators) {
+            indicator.update(candle);
+        }
 
         if(!this.ready) {
             if(this.age >= this.requiredHistory) {
@@ -20,6 +27,10 @@ class Strategy extends EventEmitter {
         } else {
             this.check(candle);
         }
+    }
+
+    calculateIndicators(candle) {
+        
     }
 
     check(candle) {
