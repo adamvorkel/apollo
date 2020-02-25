@@ -8,20 +8,23 @@ class Strategy extends EventEmitter {
 
         this.age = 0;
         this.ready = false;
-        this.indicators = {};
+        this.indicators = new Map();
         this.requiredHistory = stratSettings.params.requiredHistory || 1;
     }
 
     tick(candle) {
         ++this.age;
 
-        for(const [name, indicator] of this.indicators) {
+        this.indicators.forEach((indicator, name) => {
             indicator.update(candle);
-        }
+        });
+
+        console.log(`I need ${this.requiredHistory} candles, I have ${this.age} so far.`)
 
         if(!this.ready) {
             if(this.age >= this.requiredHistory) {
                 this.ready = true;
+                console.log(`I am now ready!`)
                 this.emit('stratReady');
             }
         } else {

@@ -17,14 +17,14 @@ class Controller extends EventEmitter {
         })
     }
 
-    async createBot(config) {
+    createBot(config) {
         const pair = `${config.watch.asset}${config.watch.currency}`;
 
         try {
             // Create the new bot
             let newBot = this.bots.create(config);
             // Get a pair stream for the new bot
-            let stream = await this.market.getStream(pair);
+            let stream = this.market.getStream(pair);
             // Connect the stream to the new bot
             stream.pipe(newBot);
         } catch(err) {

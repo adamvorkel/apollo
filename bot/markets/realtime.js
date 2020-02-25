@@ -5,7 +5,7 @@ class Realtime {
     constructor() {
         this._ws = null;
         this._url = "wss://stream.binance.com:9443/stream?streams=";
-        // this._url = "http://localhost:8081/";
+//         // this._url = "http://localhost:8081/";
         
         this._connectLock = false;
         this._retryCount = -1;
@@ -27,6 +27,7 @@ class Realtime {
     }
 
     getStream(pair) {
+        pair = pair.toLowerCase();
         if(!this.pairs.has(pair)) {
             this.pairs.set(pair, new Readable({objectMode: true, read: (chunk) => {}}));
             this.subscribe(pair);
@@ -38,19 +39,22 @@ class Realtime {
     subscribe(pair) {
         let kline = (symbol, interval) => `${symbol}@kline_${interval}`;
         const messageID = ++this.lastMessageID;
-        this._send(JSON.stringify({
+        const req = {
             method: "SUBSCRIBE",
             params: [kline(pair, "1m")],
             id: messageID
-        }));
+        };
+
+        this._send(JSON.stringify(req));
     }
 
     pushCandle(rawCandle) {
         //create candle object in format that bots can consume
         const kline = rawCandle.data.k;
         const time = rawCandle.data.E;
+        const pair = kline.s.toLowerCase()
         const candle = {
-            pair: kline.s,
+            pair: pair,
             isClosed: kline.x,
             time: time,
             start: kline.t,
@@ -62,7 +66,7 @@ class Realtime {
             volume: kline.v
         };
 
-        this.pairs.get(candle.pair).push(candle);
+        this.pairs.get(pair).push(candle);
     }
 
     _send(message) {
@@ -78,6 +82,7 @@ class Realtime {
         this._connectLock = true;
 
         this._retryCount++;
+
         console.debug(`connect attempt ${this._retryCount}`);
 
         this._wait().then(() => {
@@ -109,15 +114,21 @@ class Realtime {
             } catch(err) {
             }
         }
-        // this._ws = null;
+        console.log(this._ws);
+        console.log(this._connectTimeout);
+        console.log(this._acceptOpenTimeout);
+        console.log(this.lastMessageID)
+        console.log(this._retryCount)
+        this._ws = null;
     }
 
     _reconnect() {
+        console.log('reconnecting...')
         this._retryCount = -1;
         this._disconnect();
         this._connect();
         // resubscribe to pairs
-        this.pairs.forEach(pair => {
+        this.pairs.forEach((stream, pair) => {
             this.subscribe(pair);
         });
     }
@@ -131,7 +142,6 @@ class Realtime {
         });
     }
 
-
     _handleOpen(event) {
         console.debug('open event');
         clearTimeout(this._connectTimeout);
@@ -140,7 +150,6 @@ class Realtime {
         while(this._messageQueue.length > 0 && this._ws.readyState === WebSocket.OPEN) {
             this._send(this._messageQueue.shift());
         }
-
 
         this._acceptOpenTimeout = setTimeout(() => {
             this._retryCount = -1;
@@ -154,7 +163,6 @@ class Realtime {
     }
 
     _handleMessage(message) {
-        console.log("MESSAGE", message);
         const isCandle = (m) => {
             return m.data && m.data.e == 'kline';
         };
