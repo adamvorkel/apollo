@@ -4,7 +4,8 @@
  * 
  */
 const pipeline = require('./core/pipeline');
-
+const advisor = require('./core/advisor');
+const trader = require('./core/trader');
 
 class BotManager {
     constructor() {
@@ -16,27 +17,15 @@ class BotManager {
         const pair = `${config.watch.asset}${config.watch.currency}`;
         const mode = config.mode;
         const id = `${pair}-${mode}`;
+        
 
-        const advisor = require('./core/advisor');
-
-        let trader;
-        switch(mode) {
-            case 'realtime': 
-                trader = require('./core/trader');
-                break;
-            case 'paper':
-                trader = require('./core/paperTrader');
-                break;
-            default: 
-                console.error(`Invalid mode: ${mode}, unable to create bot...`);
-                return;
-        }
+        let advisorInstance = new advisor(config);
+        let traderInstance = trader(config);
 
         // create new bot
-        let newBot = new pipeline(config, new advisor(config), new trader(config));
+        let newBot = new pipeline(config, advisorInstance, traderInstance);
         this.bots.set(id, newBot);
         return newBot;
-
     }
 }
 
