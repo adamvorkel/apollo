@@ -1,5 +1,5 @@
 let c1  = {
-    mode: "realtime",
+    mode: "paper",
     watch: {
         currency: "USDT",
         asset: "BTC",
@@ -10,7 +10,10 @@ let c1  = {
             params: {requiredHistory: 5}
         }
     },
-    
+    portfolio: {
+        asset: 1,
+        currency: 100
+    }
 };
 
 let c2  = {
