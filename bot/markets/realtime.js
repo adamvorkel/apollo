@@ -5,7 +5,6 @@ class Realtime {
     constructor() {
         this._ws = null;
         this._url = "wss://stream.binance.com:9443/stream?streams=";
-//         // this._url = "http://localhost:8081/";
         
         this._connectLock = false;
         this._retryCount = -1;
@@ -83,8 +82,6 @@ class Realtime {
 
         this._retryCount++;
 
-        console.debug(`connect attempt ${this._retryCount}`);
-
         this._wait().then(() => {
             this._ws = new WebSocket(this._url);
             this._connectLock = false;
@@ -114,16 +111,11 @@ class Realtime {
             } catch(err) {
             }
         }
-        console.log(this._ws);
-        console.log(this._connectTimeout);
-        console.log(this._acceptOpenTimeout);
-        console.log(this.lastMessageID)
-        console.log(this._retryCount)
         this._ws = null;
     }
 
     _reconnect() {
-        console.log('reconnecting...')
+        console.log('reconnecting...');
         this._retryCount = -1;
         this._disconnect();
         this._connect();
@@ -135,7 +127,6 @@ class Realtime {
 
     _wait() {
         let delay = (this._retryCount > 0) ? Math.min(1000 * Math.pow(1.3, this._retryCount), this._maxReconnectDelay) : 0;
-        console.debug(`next delay ${delay}`);
 
         return new Promise((resolve, reject) => {
             setTimeout(resolve, delay);
@@ -143,7 +134,6 @@ class Realtime {
     }
 
     _handleOpen(event) {
-        console.debug('open event');
         clearTimeout(this._connectTimeout);
         
         // send queued messages

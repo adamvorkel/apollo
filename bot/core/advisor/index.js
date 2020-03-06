@@ -24,6 +24,20 @@ class Advisor extends EventEmitter {
         } catch(err) {
             throw new Error(`Unable to load strategy ${stratSettings.name}`);
         }
+
+        // // check for required methods
+        // try {
+        //     let requiredMethods = ['init', 'check'];
+        //     requiredMethods.forEach(method => {
+        //         if(!this.strategy[method])
+        //             throw new Error(`Missing strategy method ${method}`);
+        //     });
+        //     console.log('all methods present on strategy', requiredMethods)
+        // } catch(err) {
+        //     console.error('Invalid strategy', err.message);
+        // }
+
+        // // create indicators
     }
 
     processCandle(candle) {

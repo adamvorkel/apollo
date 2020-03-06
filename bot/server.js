@@ -26,15 +26,13 @@ let api = (botManager) => {
         console.log(`Apollo API listening on port ${port}`);
     });
 
-    console.log('run')
-
     /*-----------------*/
     // WSS server
     /*-----------------*/
     const wss = new WebSocketServer({server: server});
 
     wss.on('connection', ws => {
-        console.log(`New websocket connected`)
+        console.log(`New websocket client connected`)
         ws.isAlive = true;
         ws.on('pong', () => {
             ws.isAlive = true;
@@ -63,7 +61,7 @@ let api = (botManager) => {
         wss.clients.forEach(ws => {
             ws.send(payload, err => {
                 if(err) {
-                    console.log("Broadcast error")
+                    console.error("Broadcast error")
                 }
             })
         })
