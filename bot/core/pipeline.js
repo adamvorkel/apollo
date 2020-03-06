@@ -1,13 +1,14 @@
 const { Writable } = require('stream');
 
 class pipeline extends Writable {
-    constructor(config, advisor, trader) {
+    constructor(config, advisor, trader, broker) {
         super({objectMode: true});
 
         this.config = config;
         this.advisor = advisor;
         this.trader = trader;
-        this.plugins = {};
+        this.broker = broker;
+        this.plugins = new Map();
 
         this.setup();
         this.loadPlugins();
@@ -30,7 +31,7 @@ class pipeline extends Writable {
                         let pluginType = require('../plugins/' + plugin.slug);
                         let pluginInstance = new pluginType(this.config);
                         pluginInstance.meta = plugin;
-                        this.plugins[plugin.slug] = pluginInstance;
+                        this.plugins.set(plugin.slug, pluginInstance);
                     } catch(err) {
                         console.error(`Unable to load ${plugin.name} plugin`);
                     }
@@ -40,21 +41,17 @@ class pipeline extends Writable {
     }
 
     subscribePlugins() {
-        for(const pluginSlug in this.plugins) {
-            let plugin = this.plugins[pluginSlug];
-            if(plugin.meta.subscriptions !== undefined) {
-                //handle each subscription
-                plugin.meta.subscriptions.forEach((sub) => {
-                    let emitter = this.plugins[sub.emitter];
-                    if(emitter) {
-                        emitter.on(sub.event, plugin[sub.handler])
+        this.plugins.forEach((plugin, slug) => {
+            if(plugin.meta.subscriptions) {
+                plugin.meta.subscriptions.forEach(sub => {
+                    if(this.plugins.has(sub.emitter)) {
+                        this.plugins.get(sub.emitter).on(sub.event, plugin[sub.handler]);
                     } else {
-                        console.log(`${pluginSlug} wants to subscribe to ${sub.emitter} but it is not enabled`);
-                        process.exit();
-                    } 
-                });
+                        throw new Error(`${slug} wants to subscribe to ${sub.emitter} but it is not enabled`);
+                    }
+                })
             }
-        }
+        });
     }
 
     _write(candle, encoding, callback) {

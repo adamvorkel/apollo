@@ -19,7 +19,6 @@ class App extends React.Component {
 			ws: null,
 			status: CONN_STATUS.CONNECTING,
 			error: null,
-			bots: []
 		};
 	}
 
@@ -42,23 +41,17 @@ class App extends React.Component {
 		};
 
 		ws.onmessage = message => {
-			let payload;
+			
+			let data;
 			try {
-				payload = JSON.parse(message.data);
+				data = JSON.parse(message.data);
 			} catch(err) {
-				payload = {};
+				data = {};
 				console.log("Error parsing message");
 			}
-
-			if(payload.event === 'botStarted') {
-				this.setState(state => {
-					const list = [...state.bots, payload.payload];
-					return {
-						bots: list
-					}
-				})
-				console.log(this.state)
-				
+	
+			if(data.event === 'state') {
+				console.log(data.payload);
 			}
 		}
 
@@ -130,7 +123,7 @@ class App extends React.Component {
 						<h2>Sidebar</h2>
 						<p>Some content will go here</p>
 					</aside>
-					<Cards bots = {this.state.bots} />
+					<Cards />
 				</div>
 	
 			</div>

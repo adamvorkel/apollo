@@ -1,14 +1,17 @@
 const {EventEmitter} = require('events');
 const stops = require('../stops');
+const portfolio = require('./portfolio');
 
 class PaperTrader extends EventEmitter {
     constructor(config) {
         super();
         this.config = config;
-        this.portfolio = config.portfolio;
-        this.balance = null;
-        this.fee = 0.0015;
+
+        this.portfolio = new portfolio(config);
+        this.price = null;
+        this.exposed = false;
         this.activeStop = null;
+        this.pendingOrder = null;
 
         this.processAdvice = this.processAdvice.bind(this);
         this.createOrder = this.createOrder.bind(this);
@@ -16,18 +19,23 @@ class PaperTrader extends EventEmitter {
 
     processCandle(candle) {
         this.price = candle.close;
-        console.log(`${this.config.watch.asset} PaperTrader:  ${this.price} ${this.config.watch.currency}`);
-        this.balance = this.portfolio.currency + this.price * this.portfolio.asset;
-        
         if(this.activeStop) this.activeStop.update(this.price);
+        console.log(`${this.config.watch.asset} PaperTrader:  ${this.price} ${this.config.watch.currency}`);
     }
 
     processAdvice(advice) {
-        // check if exposed here?
         if(advice.action === 'buy') {
-
-        } else if(advice.action === 'sell') {
-
+            if(this.exposed) {
+                // cancel pending sell order if any
+                return;
+            }
+        } 
+        else 
+        if(advice.action === 'sell') {
+            if(!this.exposed) {
+                // cancel pending buy order if any
+                return;
+            }
         }
 
         //create order here
@@ -44,6 +52,7 @@ class PaperTrader extends EventEmitter {
     createStop(stop) {
         if(stop.type === 'trail') {
             this.activeStop = new stops.TrailingStop(stop.price, stop.trail);
+            // when stop gets triggered, sell
             this.activeStop.on('trigger', async (advice) => {
                 await this.createOrder(advice);
                 this.removeStop();

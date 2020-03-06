@@ -1,15 +1,13 @@
 const EventEmitter = require('events');
 
-class Broker extends EventEmitter {
+class realtimeBroker extends EventEmitter {
     constructor() {
         super();
-        this.API;
+        console.log('BROOOOKER')
     }
-
-
 
     createOrder(order) {
     }
 }
 
-module.exports = Broker;
+module.exports = realtimeBroker;

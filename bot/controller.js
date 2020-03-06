@@ -1,40 +1,38 @@
 const {EventEmitter} = require('events');
 const botManager = require('./botManager');
 const backtestManager = require('./BacktestManager');
-const market = require('./markets/realtime');
-
+const market = require('./core/markets');
 
 class Controller extends EventEmitter {
     constructor(config) {
         super();
-        this.accountStream = null;
-        this.market = new market();
-        this.bots = new botManager();
-        this.backtests = new backtestManager();
-
-        this.backtests.on('backtestComplete', results => {
-            this.emit('event', {type: 'backtestComplete', payload: results});
-        })
+        this.market = new market.realtime();
+        this.realtimeBots = new botManager('realtime', this.market);
+        this.paperBots = new botManager('paper', this.market);
+        this.backtestBots = new backtestManager();
     }
 
     createBot(config) {
-        const pair = `${config.watch.asset}${config.watch.currency}`;
-
-        try {
-            // Create the new bot
-            let newBot = this.bots.create(config);
-            // Get a pair stream for the new bot
-            let stream = this.market.getStream(pair);
-            // Connect the stream to the new bot
-            stream.pipe(newBot);
-        } catch(err) {
-            console.log(`Failed to create a bot for pair ${pair}`, err);
-            return;
-        }
+        const mode = config.mode;
+        switch(mode) {
+            case 'realtime': 
+                this.realtimeBots.create(config);
+                break;
+            case 'paper': 
+                this.paperBots.create(config);
+                break;
+            case 'backtest':
+                this.backtestBots.create(config);
+        } 
     }
 
-    async createBacktest(config) {
-        let backtestProcess = await this.backtests.create(config);
+    getState() {
+        let realtimeBots = this.realtimeBots.list();
+        let paperBots = this.paperBots.list();
+        return {
+            'realtime': realtimeBots,
+            'paper': paperBots
+        };
     }
 }
 
