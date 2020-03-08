@@ -1,8 +1,7 @@
-const {EventEmitter} = require('events');
-const stops = require('../stops');
+const EventEmitter = require('events');
 const portfolio = require('./portfolio');
 
-class PaperTrader extends EventEmitter {
+class Trader extends EventEmitter {
     constructor(config) {
         super();
         this.config = config;
@@ -20,7 +19,7 @@ class PaperTrader extends EventEmitter {
     processCandle(candle) {
         this.price = candle.close;
         if(this.activeStop) this.activeStop.update(this.price);
-        console.log(`${this.config.watch.asset} PaperTrader:  ${this.price} ${this.config.watch.currency}`);
+        console.log(`${this.config.watch.asset} trader:  ${this.price} ${this.config.watch.currency}`);
     }
 
     processAdvice(advice) {
@@ -65,9 +64,6 @@ class PaperTrader extends EventEmitter {
         console.log('Deleting stop...')
         this.activeStop = null;
     }
-
-
-
 }
 
-module.exports = PaperTrader;
+module.exports = Trader;

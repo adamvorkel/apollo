@@ -1,13 +1,12 @@
 const EventEmitter = require('events');
 
-class paperBroker extends EventEmitter {
+class PaperBroker extends EventEmitter {
     constructor() {
         super();
-        console.log('BROOOOKER')
     }
 
     createOrder(order) {
     }
 }
 
-module.exports = paperBroker;
+module.exports = PaperBroker;

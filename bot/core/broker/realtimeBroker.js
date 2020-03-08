@@ -1,13 +1,12 @@
 const EventEmitter = require('events');
 
-class realtimeBroker extends EventEmitter {
+class RealtimeBroker extends EventEmitter {
     constructor() {
         super();
-        console.log('BROOOOKER')
     }
 
     createOrder(order) {
     }
 }
 
-module.exports = realtimeBroker;
+module.exports = RealtimeBroker;

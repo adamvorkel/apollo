@@ -12,7 +12,7 @@ const boot = config => {
     let b1 = app.createBot(c1);
     let b2 = app.createBot(c2);
     let b3 = app.createBot(c3);
-    // let b4 = app.createBot(c4);
+    let b4 = app.createBot(c3);
     // let b5 = app.createBot(c5);
     // let b6 = app.createBacktest(c6);
 
@@ -24,7 +24,6 @@ const boot = config => {
     }, 1000);
 
     app.on('event', event => {
-        console.log(`${event.type} event occured, push to clients`);
         api.broadcast(event.type, event.payload);
     });
 };

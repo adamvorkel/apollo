@@ -60,15 +60,13 @@ let api = (controller) => {
             payload: data
         });
 
-        console.log(`Broadcasting ${payload} - `);
-
         wss.clients.forEach(ws => {
             ws.send(payload, err => {
                 if(err) {
                     console.error("Broadcast error")
                 }
             })
-        })
+        });
     }
 
     const pushState = () => {

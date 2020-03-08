@@ -4,7 +4,7 @@ const backtestManager = require('./BacktestManager');
 const market = require('./core/markets');
 
 class Controller extends EventEmitter {
-    constructor(config) {
+    constructor() {
         super();
         this.market = new market.realtime();
         this.realtimeBots = new botManager('realtime', this.market);
@@ -14,16 +14,20 @@ class Controller extends EventEmitter {
 
     createBot(config) {
         const mode = config.mode;
-        switch(mode) {
-            case 'realtime': 
-                this.realtimeBots.create(config);
-                break;
-            case 'paper': 
-                this.paperBots.create(config);
-                break;
-            case 'backtest':
-                this.backtestBots.create(config);
-        } 
+        try {
+            switch(mode) {
+                case 'realtime': 
+                    this.realtimeBots.create(config);
+                    break;
+                case 'paper': 
+                    this.paperBots.create(config);
+                    break;
+                case 'backtest':
+                    this.backtestBots.create(config);
+            } 
+        } catch(err) {
+            console.error(err);
+        }
     }
 
     getState() {

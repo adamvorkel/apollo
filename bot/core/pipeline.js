@@ -54,7 +54,7 @@ class pipeline extends Writable {
         });
     }
 
-    _write(candle, encoding, callback) {
+    _write(candle, _, callback) {
         this.advisor.processCandle(candle);
         this.trader.processCandle(candle);
         for(const pluginSlug in this.plugins) {
