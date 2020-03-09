@@ -1,14 +1,37 @@
 const {EventEmitter} = require('events');
 const botManager = require('./botManager');
 const backtestManager = require('./BacktestManager');
-const market = require('./core/markets');
+const market = require('./markets');
+const brokers = require('./broker');
 
 class Controller extends EventEmitter {
-    constructor() {
+    constructor(config) {
         super();
+        this.config = config;
+        this.exchange = config.watch.exchange;
+
+        this.market;
+
+        this.realtimeBots;
+        this.paperBots;
+        this.backtestBots;
+
+        this.setup();
+    }
+
+    setup() {
+        // check exchange is supported
+        if(!(this.exchange in brokers)) {
+            throw new Error(`Unsupported exchange ${this.exchange}`)
+        }
+
         this.market = new market.realtime();
-        this.realtimeBots = new botManager('realtime', this.market);
-        this.paperBots = new botManager('paper', this.market);
+        this.broker = new brokers[this.exchange](this.config);
+
+        let mockBroker = {};
+        
+        this.realtimeBots = new botManager('realtime', this.market, this.broker);
+        this.paperBots = new botManager('paper', this.market, mockBroker);
         this.backtestBots = new backtestManager();
     }
 
@@ -16,17 +39,22 @@ class Controller extends EventEmitter {
         const mode = config.mode;
         try {
             switch(mode) {
-                case 'realtime': 
+                case 'realtime': {
+                    if(this.realtimeBots.exists(config)) {
+                        const existingBotID = this.realtimeBots.generateID(config);
+                        throw new Error(`${existingBotID} bot instance already active - unable to create another instance`);
+                    }
                     this.realtimeBots.create(config);
                     break;
+                }
                 case 'paper': 
                     this.paperBots.create(config);
                     break;
                 case 'backtest':
                     this.backtestBots.create(config);
             } 
-        } catch(err) {
-            console.error(err);
+        } catch(error) {
+            console.error(error.message);
         }
     }
 

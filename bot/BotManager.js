@@ -1,41 +1,30 @@
 /**
  * 
- * Manages intances of bots
+ * Manages bot instances
  * 
  */
+
 const pipeline = require('./core/pipeline');
-const advisor = require('./core/advisor');
-const trader = require('./core/trader');
-const broker = require('./core/broker');
+
 
 class BotManager {
-    constructor(mode, market) {
+    constructor(mode, market, broker) {
         this.bots = new Map();
         this.create = this.create.bind(this);
-        this.market = market;
         this.mode = mode;
+        this.market = market;
+        this.broker = broker;
     }
 
     create(config) {
+        const id = this.generateID(config);
         const pair = `${config.watch.asset}${config.watch.currency}`;
-        const mode = this.mode;
-        const id = `${pair}-${mode}`;
+        
+        // this gets injected (different depending on mode)
+        let brokerInstance = {};
+        // let brokerInstance = new broker[mode](config);
 
-        if(this.bots.has(id) && this.mode === 'realtime') {
-            throw new Error(`${id} bot instance already active - unable to create another instance`)
-        }
-        
-        /**
-         * A bot is a collection of:
-         * - advisor: provides buy/sell advice from running strategy
-         * - trader: creates buy/sell orders from advice
-         * - broker: executes/monitors trades based on orders
-         */
-        let advisorInstance = new advisor(config);
-        let traderInstance = new trader(config);
-        let brokerInstance = new broker[mode](config);
-        
-        let newBot = new pipeline(config, advisorInstance, traderInstance, brokerInstance);
+        let newBot = new pipeline(config, brokerInstance);
 
         // pipe candle stream
         let stream = this.market.getStream(pair);
@@ -48,6 +37,17 @@ class BotManager {
         });
         
         return newBot;
+    }
+
+    exists(config) {
+        const id = this.generateID(config);
+        return this.bots.has(id);
+    }
+
+    generateID(config) {
+        const pair = `${config.watch.asset}${config.watch.currency}`;
+        const id = `${pair}-${this.mode}`;
+        return id;
     }
 
     list() {

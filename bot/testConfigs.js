@@ -27,7 +27,7 @@ let c2  = {
 };
 
 let c3  = {
-    mode: "paper",
+    mode: "realtime",
     watch: {
         currency: "BTC",
         asset: "ZEC",

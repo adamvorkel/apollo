@@ -2,15 +2,17 @@ const EventEmitter = require('events');
 const portfolio = require('./portfolio');
 
 class Trader extends EventEmitter {
-    constructor(config) {
+    constructor(config, broker) {
         super();
         this.config = config;
 
         this.portfolio = new portfolio(config);
+        this.broker = broker;
+
         this.price = null;
         this.exposed = false;
         this.activeStop = null;
-        this.pendingOrder = null;
+        this.orders = [];
 
         this.processAdvice = this.processAdvice.bind(this);
         this.createOrder = this.createOrder.bind(this);

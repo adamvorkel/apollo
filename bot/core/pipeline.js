@@ -1,13 +1,22 @@
 const { Writable } = require('stream');
+const advisor = require('./advisor');
+const trader = require('./trader');
+
+
+/**
+ * A bot is a pipeline of:
+ * - advisor: provides buy/sell advice from running strategy
+ * - trader: creates/monitors orders based on advice
+ * - plugins
+ */
 
 class pipeline extends Writable {
-    constructor(config, advisor, trader, broker) {
+    constructor(config, broker) {
         super({objectMode: true});
-
         this.config = config;
-        this.advisor = advisor;
-        this.trader = trader;
-        this.broker = broker;
+
+        this.advisor = new advisor(config);
+        this.trader = new trader(config, broker);
         this.plugins = new Map();
 
         this.setup();
