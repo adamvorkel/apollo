@@ -10,9 +10,6 @@ class Binance {
 
         this.key = config.watch.key;
         this.secret = config.watch.secret;
-        this.currency = config.watch.currency.toUpperCase();
-        this.asset = config.watch.asset.toUpperCase();
-        this.pair = this.asset + this.currency;
     }
 
     // startTimeSync() {
@@ -115,9 +112,9 @@ class Binance {
     // optional since parameter (unix timestamp in milliseconds)
     // if since is passed, will return the hour of trades since then
     // defaults to 
-    getTrades(since) {
+    getTrades(pair, since) {
         let query = {
-            symbol: this.pair
+            symbol: pair
         };
 
         if(since) {
@@ -154,7 +151,6 @@ class Binance {
     }
 
     klines(query = {}) {
-        query.symbol = this.pair;
         return this._makeRequest(query, "api/v3/klines");
     }
     
@@ -216,9 +212,9 @@ class Binance {
     }
 
     //utility methods
-    addOrder(tradeType, quantity, price) {
+    addOrder(tradeType, pair, quantity, price) {
         let req = {
-            symbol: this.pair,
+            symbol: pair,
             side: tradeType.toUpperCase(),
             type: "LIMIT",
             timeInForce: "GTC",

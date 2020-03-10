@@ -5,12 +5,13 @@ class Advisor extends EventEmitter {
         super();
         this.strategy = null;
         this.config = config;
+        this.name = this.config.strategy.name;
 
         this.setup();
     }
 
     setup() {
-        this.loadStrategy(this.config.advisor.strategy);
+        this.loadStrategy(this.config.strategy);
         this.strategy.on("stratReady", () => {this.emit("stratReady")});
         this.strategy.on("stratUpdate", update => this.emit("stratUpdate", update));
         this.strategy.on("advice", advice => this.emit("advice", advice));
@@ -19,10 +20,10 @@ class Advisor extends EventEmitter {
     loadStrategy(stratSettings) {
         let strategy;
         try {
-            strategy = require('./strategies/' + stratSettings.name);
+            strategy = require('./strategies/' + this.name);
             this.strategy = new strategy(stratSettings);
         } catch(err) {
-            throw new Error(`Unable to load strategy ${stratSettings.name}`);
+            throw new Error(`Unable to load strategy ${this.name}`);
         }
 
         // // check for required methods
@@ -38,6 +39,14 @@ class Advisor extends EventEmitter {
         // }
 
         // // create indicators
+    }
+
+    getState() {
+        return {
+            name: this.name,
+            age: this.strategy.age,
+            ready: this.strategy.ready
+        };
     }
 
     processCandle(candle) {

@@ -11,7 +11,7 @@ class Cards extends Component {
         return (
             <main className="cards">
                 <Card>
-                    <Bots bots={this.props.bots}/>
+                    <Bots/>
                 </Card>
                 <Card />
                 

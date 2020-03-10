@@ -1,7 +1,7 @@
 const express = require('express');
 const WebSocketServer = require('ws').Server;
 
-let api = (botManager) => {
+let api = (controller) => {
 
     // return new Promise((res, rej) => {
 
@@ -54,21 +54,28 @@ let api = (botManager) => {
     }, 10 * 1000);
 
     const broadcast = (event, data) => {
+        
         const payload = JSON.stringify({
             event: event, 
             payload: data
         });
+
         wss.clients.forEach(ws => {
             ws.send(payload, err => {
                 if(err) {
                     console.error("Broadcast error")
                 }
             })
-        })
+        });
+    }
+
+    const pushState = () => {
+        broadcast('state', controller.getState());
     }
 
     return {
-        broadcast
+        broadcast,
+        pushState
     }
 }
 

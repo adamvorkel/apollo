@@ -1,16 +1,17 @@
 let c1  = {
-    mode: "realtime",
+    mode: "paper",
     watch: {
         currency: "USDT",
         asset: "BTC",
     },
-    advisor: {
-        strategy: {
-            name: 'myStrategy',
-            params: {requiredHistory: 5}
-        }
+    strategy: {
+        name: 'myStrategy',
+        params: {requiredHistory: 5}
     },
-    
+    portfolio: {
+        asset: 1,
+        currency: 100
+    }
 };
 
 let c2  = {
@@ -19,11 +20,9 @@ let c2  = {
         currency: "BTC",
         asset: "BNB",
     },
-    advisor: {
-        strategy: {
-            name: 'myStrategy',
-            params: []
-        }
+    strategy: {
+        name: 'myStrategy',
+        params: []
     },
 };
 
@@ -33,11 +32,9 @@ let c3  = {
         currency: "BTC",
         asset: "ZEC",
     },
-    advisor: {
-        strategy: {
-            name: 'myStrategy',
-            params: []
-        }
+    strategy: {
+        name: 'myStrategy',
+        params: []
     },
 };
 
@@ -47,11 +44,9 @@ let c4  = {
         currency: "BTC",
         asset: "EOS",
     },
-    advisor: {
-        strategy: {
-            name: 'myStrategy',
-            params: []
-        }
+    strategy: {
+        name: 'myStrategy',
+        params: []
     },
 };
 
@@ -61,12 +56,10 @@ let c5  = {
         currency: "BTC",
         asset: "XRP",
     },
-    advisor: {
-        strategy: {
-            name: 'myStrategy',
-            params: []
-        }
-    },
+    strategy: {
+        name: 'myStrategy',
+        params: []
+    }
 };
 
 let c6  = {
@@ -79,11 +72,9 @@ let c6  = {
         from: '',
         to: ''
     },
-    advisor: {
-        strategy: {
-            name: 'myStrategy',
-            params: []
-        }
+    strategy: {
+        name: 'myStrategy',
+        params: []
     },
 };
 

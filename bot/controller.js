@@ -1,40 +1,70 @@
 const {EventEmitter} = require('events');
 const botManager = require('./botManager');
 const backtestManager = require('./BacktestManager');
-const market = require('./markets/realtime');
-
+const market = require('./markets');
+const brokers = require('./broker');
 
 class Controller extends EventEmitter {
     constructor(config) {
         super();
-        this.accountStream = null;
-        this.market = new market();
-        this.bots = new botManager();
-        this.backtests = new backtestManager();
+        this.config = config;
+        this.exchange = config.watch.exchange;
 
-        this.backtests.on('backtestComplete', results => {
-            this.emit('event', {type: 'backtestComplete', payload: results});
-        })
+        this.market;
+
+        this.realtimeBots;
+        this.paperBots;
+        this.backtestBots;
+
+        this.setup();
+    }
+
+    setup() {
+        // check exchange is supported
+        if(!(this.exchange in brokers)) {
+            throw new Error(`Unsupported exchange ${this.exchange}`)
+        }
+
+        this.market = new market.realtime();
+        this.broker = new brokers[this.exchange](this.config);
+
+        let mockBroker = {};
+        
+        this.realtimeBots = new botManager('realtime', this.market, this.broker);
+        this.paperBots = new botManager('paper', this.market, mockBroker);
+        this.backtestBots = new backtestManager();
     }
 
     createBot(config) {
-        const pair = `${config.watch.asset}${config.watch.currency}`;
-
+        const mode = config.mode;
         try {
-            // Create the new bot
-            let newBot = this.bots.create(config);
-            // Get a pair stream for the new bot
-            let stream = this.market.getStream(pair);
-            // Connect the stream to the new bot
-            stream.pipe(newBot);
-        } catch(err) {
-            console.log(`Failed to create a bot for pair ${pair}`, err);
-            return;
+            switch(mode) {
+                case 'realtime': {
+                    if(this.realtimeBots.exists(config)) {
+                        const existingBotID = this.realtimeBots.generateID(config);
+                        throw new Error(`${existingBotID} bot instance already active - unable to create another instance`);
+                    }
+                    this.realtimeBots.create(config);
+                    break;
+                }
+                case 'paper': 
+                    this.paperBots.create(config);
+                    break;
+                case 'backtest':
+                    this.backtestBots.create(config);
+            } 
+        } catch(error) {
+            console.error(error.message);
         }
     }
 
-    async createBacktest(config) {
-        let backtestProcess = await this.backtests.create(config);
+    getState() {
+        let realtimeBots = this.realtimeBots.list();
+        let paperBots = this.paperBots.list();
+        return {
+            'realtime': realtimeBots,
+            'paper': paperBots
+        };
     }
 }
 
