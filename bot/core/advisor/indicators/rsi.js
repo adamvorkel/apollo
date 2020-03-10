@@ -1,35 +1,43 @@
 
-
 class RSI {
     constructor(options) {
         this.period = options.period;
         this.lastPrice;
-        this.up = 0;
-        this.down = 0;
         this.sup = 0;
         this.sdown = 0;
         this.result = null;
+        this.age = 0;
     }
 
     update(candle) {
         this.price = candle.close;
+        ++this.age;
+
         if(!this.lastPrice) {
-            this.lastPrice = this.price;
+            this.lastPrice = candle.close;
             return;
         }
-        // console.log(this.price);
-        this.up = (this.price > this.lastPrice) ? (this.price - this.lastPrice) : 0;
-        // console.log(this.up)
-        this.down = (this.price < this.lastPrice) ? (this.lastPrice - this.price) : 0;
-        // console.log(this.down)
-        this.sup = ((this.period - 1) / this.period) * this.sup + (1 / this.period) * this.up;
-        // console.log(this.sup);
-        this.sdown = ((this.period - 1) / this.period) * this.sdown + (1 / this.period) * this.down;
-        // console.log(this.sdown)
+
+        let upward = this.price > this.lastPrice ? this.price - this.lastPrice : 0;
+        let downward = this.price < this.lastPrice ? this.lastPrice - this.price : 0;
+
+        if(this.result) {
+            this.sup = (upward - this.sup) * (1 / this.period) + this.sup;
+            this.sdown = (downward - this.sdown) * (1 / this.period) + this.sdown;
+        } else {
+            this.sup += upward;
+            this.sdown += downward;
+            if(this.age > this.period) {
+                this.sup /= this.period;
+                this.sdown /= this.period;
+            }
+        }
+
+        if(this.age > this.period) {
+            this.result = 100 * (this.sup / (this.sup + this.sdown));
+        }
+        
         this.lastPrice = this.price;
-        // console.log(this.sup / this.sdown)
-        this.result = 100 - (100 / (1 + this.sup / this.sdown));
-        console.log(this.result);
     }
 }
 
