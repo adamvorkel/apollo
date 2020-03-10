@@ -24,17 +24,19 @@ class BotManager {
         let brokerInstance = {};
         // let brokerInstance = new broker[mode](config);
 
-        let newBot = new pipeline(config, brokerInstance);
+        let instance = new pipeline(config, brokerInstance);
 
         // pipe candle stream
         let stream = this.market.getStream(pair);
-        stream.pipe(newBot);
+        stream.pipe(instance);
 
-        this.bots.set(id, {
-            pair: pair,
+        let newBot = {
+            pair,
             startTime: Date.now(),
-            instance: newBot
-        });
+            instance,
+        };
+
+        this.bots.set(id, newBot);
         
         return newBot;
     }
