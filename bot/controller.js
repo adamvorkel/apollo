@@ -2,7 +2,7 @@ const {EventEmitter} = require('events');
 const botManager = require('./botManager');
 const backtestManager = require('./BacktestManager');
 const market = require('./markets');
-const brokers = require('./broker');
+const brokers = require('./brokers');
 
 class Controller extends EventEmitter {
     constructor(config) {
