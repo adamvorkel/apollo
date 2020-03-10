@@ -7,36 +7,33 @@ const server = require('./server');
 // remove later
 const {c1, c2, c3, c4, c5, c6} = require('./testConfigs');
 
-const boot = config => {
-    console.log("--- Booting... ---");
-
-    let app;
+const boot = async config => {
+    console.log("Booting...");
     try {
-        app = new controller(config);
+        let ctrl = new controller(config);
+        let api = server(config, ctrl);
+        console.log("Boot complete");
+        let b1 = ctrl.createBot(c1);
+        let b2 = ctrl.createBot(c2);
+        let b3 = ctrl.createBot(c3);
+        let b4 = ctrl.createBot(c4);
+        console.log(b1)
     } catch(error) {
-        console.log(error);
+        console.log("Boot failed: ", error.message);
         process.exit(1);
     }
 
-    console.log("--- Boot complete ---");
     
-    let b1 = app.createBot(c1);
-    let b2 = app.createBot(c2);
-    let b3 = app.createBot(c3);
-    let b4 = app.createBot(c4);
-    // let b5 = app.createBot(c5);
-    // let b6 = app.createBacktest(c6);
-
+    /**
+     * This is temporarily here for testing
+     */
     
-    const api = server(app);
+    // let b5 = controller.createBot(c5);
+    // let b6 = controller.createBacktest(c6);
 
-    setInterval(() => {
-        api.pushState();
-    }, 1000);
-
-    app.on('event', event => {
-        api.broadcast(event.type, event.payload);
-    });
+    // app.on('event', event => {
+    //     api.broadcast(event.type, event.payload);
+    // });
 };
 
 boot(config);

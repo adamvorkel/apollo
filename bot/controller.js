@@ -44,14 +44,12 @@ class Controller extends EventEmitter {
                         const existingBotID = this.realtimeBots.generateID(config);
                         throw new Error(`${existingBotID} bot instance already active - unable to create another instance`);
                     }
-                    this.realtimeBots.create(config);
-                    break;
+                    return this.realtimeBots.create(config);
                 }
                 case 'paper': 
-                    this.paperBots.create(config);
-                    break;
+                    return this.paperBots.create(config);
                 case 'backtest':
-                    this.backtestBots.create(config);
+                    return this.backtestBots.create(config);
             } 
         } catch(error) {
             console.error(error.message);

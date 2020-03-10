@@ -1,36 +1,28 @@
 const express = require('express');
 const WebSocketServer = require('ws').Server;
+const http = require('http');
 
-let api = (controller) => {
+/**
+ * 
+ * REST API server
+ * 
+ */
 
-    // return new Promise((res, rej) => {
+let setupServer = (app) => {
+    return new Promise((resolve, reject) => {
+        
+        
+    })
+}
 
-    // })
-
-    /*-----------------*/
-    // REST API server
-    /*-----------------*/
-    const app = express();
-    const port = 3001;
-
-    // App middleware config
-    app.use(express.json());
-    app.use(express.urlencoded({extended: true}));
-
-    // Endpoints
-    app.get('/api/bots', (req, res) => {});
-
-    app.post('/api/stopBot', (req, res) => {});
-
-    let server = app.listen(port, () => {
-        console.log(`Apollo API listening on port ${port}`);
-    });
-
-    /*-----------------*/
-    // WSS server
-    /*-----------------*/
-    const wss = new WebSocketServer({server: server});
-
+/**
+ * 
+ * WSS server
+ * 
+ */
+let setupWSServer = (server) => {
+    let wss = new WebSocketServer({server});
+    
     wss.on('connection', ws => {
         console.log(`New websocket client connected`)
         ws.isAlive = true;
@@ -40,9 +32,10 @@ let api = (controller) => {
         ws.ping();
         ws.on('error', e => {
             // handle socket error
-        })
+        });
     });
-
+    
+    // heartbeat
     setInterval(() => {
         wss.clients.forEach(ws => {
             if(!ws.isAlive) {
@@ -53,30 +46,32 @@ let api = (controller) => {
         })
     }, 10 * 1000);
 
-    const broadcast = (event, data) => {
-        
-        const payload = JSON.stringify({
-            event: event, 
-            payload: data
-        });
+    return wss;
+}
 
-        wss.clients.forEach(ws => {
-            ws.send(payload, err => {
-                if(err) {
-                    console.error("Broadcast error")
-                }
-            })
-        });
+
+let api = (config, controller) => {
+
+    let app = express();
+    app.use(express.json());
+    app.use(express.urlencoded({extended: true}));
+
+    // Endpoints
+    app.get('/api/bots', (req, res) => {});
+
+    let server = http.createServer(app);
+    let wss = setupWSServer(server);
+
+    server.listen(config.api.port, () => {
+        console.log(`API listening on port ${config.api.port}`);
+    });
+
+    const broadcast = (event, payload) => {
+        let message = JSON.stringify({ event, payload });
+        wss.clients.forEach(ws => ws.send(message));
     }
 
-    const pushState = () => {
-        broadcast('state', controller.getState());
-    }
-
-    return {
-        broadcast,
-        pushState
-    }
+    return { broadcast };
 }
 
 module.exports = api;

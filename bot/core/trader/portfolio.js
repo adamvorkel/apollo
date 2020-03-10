@@ -5,7 +5,6 @@ class Portfolio extends EventEmitter {
         super();
         this.fee = null;
         this.balances = {};
-        console.log('created portfolio instance');
     }
 
     update() {
