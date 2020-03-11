@@ -17,7 +17,6 @@ const boot = async config => {
         let b2 = ctrl.createBot(c2);
         let b3 = ctrl.createBot(c3);
         let b4 = ctrl.createBot(c4);
-        console.log(b1)
     } catch(error) {
         console.log("Boot failed: ", error.message);
         process.exit(1);
