@@ -1,5 +1,7 @@
-.App {
 
+
+.App {
+	
 }
 
 .App-logo {
@@ -9,7 +11,7 @@
 
 .App-header {
 	width: 100%;
-	background-color: #222;
+	/* background-color: #222; */
 }
 
 .App-header-container {
@@ -36,6 +38,7 @@
 	padding: 10px;
 	color: #f7f7f7;
 	text-decoration: none;
+	font-weight: lighter;
 }
 
 .App-link {
@@ -60,9 +63,9 @@
 .App-content {
 	display: grid;
 	grid-template-areas: 
-	'sidebar cards cards';
-	padding: 1.6rem;
-	grid-gap: 1.6rem;
+	'cards';
+	padding: 0 2rem 2rem 2rem;
+	grid-gap: 2rem;
 }
 
 .sidebar {
@@ -79,14 +82,37 @@
 }
 
 .cards .card {
-	background-color: #333;
-	padding: 1rem;
+	background-color: #191919;
+	padding: 1.6rem;
 }
 
 .cards .card.big {
 	grid-column: span 2;
 }
 
-.cards .card h2 {
-	margin-bottom: 10rem;
+.cards .card h3 {
+	margin-top: 0;
+	margin-bottom: 1rem;
+	color: #f7f7f7;
+	font-size: 1.2rem;
+}
+
+.cards .card table {
+	width: 100%;
+}
+
+
+.cards .card table tr:nth-child(even) {
+	background-color: #111;
+}
+
+.cards .card table td {
+	padding: 0.4rem 0.7rem;
+}
+
+.metric-large {
+	display: block;
+	font-size: 2.6rem;
+	font-weight: 300;
+	margin-bottom: 1rem;
 }
