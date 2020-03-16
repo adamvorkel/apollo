@@ -1,15 +1,17 @@
 Open orders
 table with columns:
-id	Currency	Type	Amount	Rate	Age	Action
-1	LTC		Buy	0.29..	??	3 days	Cancel/info
+id      Currency    Type	Amount	    Rate	Age	    Action
+1	    LTC		    Buy	    0.29..      ??	    3 days	Cancel/info
 
 Open positions
 table with columns:
-id	Currency	Amount		Cost	Result		Age	Action
-1	LTC		0.xxxxxxxx		1.33%(Green)	2 days	Sell/info
+id	    Currency	Amount		Cost	    Result		Age	    Action
+1	    LTC		    0.xxxxxxxx	1.33%	                2 days	Sell/info
 
 Current assets 
-table with columns Currency and Amount (eg row, BTC - 662.54550000)
+table with columns:
+Currency    Amount 
+BTC         662.54550000
 
 Wallet scrubber
  - helps sell ammounts of currencies that are too small to sell
@@ -17,6 +19,6 @@ Wallet scrubber
 
 Message board
 shows actions and errors
-table with columns 
-Date		Type		Message
-19-02 2018	INFO		Canceling order for BTCUSDT
+table with columns:
+Date		    Type		Message
+19-02 2018	    INFO		Canceling order for BTCUSDT

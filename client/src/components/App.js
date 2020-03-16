@@ -1,10 +1,26 @@
 import React from 'react';
 import Header from './Header';
-import Cards from './Cards';
-
-import logo from '../logo.svg';
+import Dashboard from './Dashboard';
 import '../App.css';
 
+class App extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+
+	render() {
+		return(
+			<div className="App">
+				<Header />
+				<div className="App-content">
+					<Dashboard />
+				</div>
+			</div>
+		);	
+	}
+}
+
+/*
 //ENUM of ws status
 const CONN_STATUS = {
 	CONNECTING: -1,
@@ -15,11 +31,7 @@ const CONN_STATUS = {
 class App extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			ws: null,
-			status: CONN_STATUS.CONNECTING,
-			error: null,
-		};
+
 	}
 
 	componentDidMount() {
@@ -100,7 +112,7 @@ class App extends React.Component {
 		);
 	}
 }
-
+*/
 
 
 export default App;

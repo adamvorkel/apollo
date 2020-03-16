@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-
+// import logo from '../logo.svg';
 
 class Header extends Component {
     constructor(props) {
@@ -7,7 +7,7 @@ class Header extends Component {
     }
 
     render() {
-        const connStatus = this.props.connStatus;
+        // const connStatus = this.props.connStatus;
         return (
             <header className="App-header">
                 <div className="App-header-container">				
@@ -22,7 +22,7 @@ class Header extends Component {
                             <li><a href="#">Stats</a></li>
                         </ul>
                     </nav>
-                    <span className={"conn-status " + connStatus.className}>{connStatus.message}</span>
+                    {/* <span className={"conn-status " + connStatus.className}>{connStatus.message}</span> */}
                 </div>
             </header>
         )
