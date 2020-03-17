@@ -19,7 +19,7 @@ const OpenPositionsList = ({openPositions}) => (
                     </tr>
                 </thead>
                 <tbody>
-                    {openPositions.map((position, index) => (
+                    {/* {openPositions.map((position, index) => (
                         <tr key={index}>
                             <td>{position.id}</td>
                             <td>{position.asset}</td>
@@ -28,7 +28,7 @@ const OpenPositionsList = ({openPositions}) => (
                             <td>{position.result}</td>
                             <td>{position.age}</td>
                         </tr>
-                    ))}
+                    ))} */}
                 </tbody>
             </table>
         </div>

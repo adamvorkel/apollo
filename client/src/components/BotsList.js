@@ -22,7 +22,7 @@ const BotsList = ({bots}) => (
                     </tr>
                 </thead>
                 <tbody>
-                    {bots.map((bot, index) => (
+                    {/* {bots.map((bot, index) => (
                         <tr key={index}>
                             <td>{bot.uptime}</td>
                             <td>{bot.asset}</td>
@@ -30,7 +30,7 @@ const BotsList = ({bots}) => (
                             <td>{bot.strategy}</td>
                             <td>{bot.status}</td>
                         </tr>
-                    ))}
+                    ))} */}
                 </tbody>
             </table>
         </div>

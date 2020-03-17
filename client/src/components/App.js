@@ -1,24 +1,28 @@
 import React from 'react';
-import Header from './Header';
-import Dashboard from './Dashboard';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Header from './Layout/Header';
+import Login from './Pages/Login';
+import Dashboard from './Pages/Dashboard';
+import Sales from './Pages/Sales';
+import Stats from './Pages/Stats';
+
 import '../App.css';
 
-class App extends React.Component {
-	constructor(props) {
-		super(props);
-	}
-
-	render() {
-		return(
-			<div className="App">
-				<Header />
-				<div className="App-content">
-					<Dashboard />
-				</div>
+const App  = () => (
+	<Router>
+		<div className="App">
+			{/* <Header /> */}
+			<div className="App-content">
+				<Route exact path="/" component={Login}/>
+				<Switch>
+					<Route exact path="/dashboard" component={Dashboard}/>
+					<Route exact path="/sales" component={Sales}/>
+					<Route exact path="/stats" component={Stats}/>
+				</Switch>
 			</div>
-		);	
-	}
-}
+		</div>
+	</Router>
+)
 
 /*
 //ENUM of ws status

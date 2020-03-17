@@ -1,5 +1,11 @@
 :root {
 	--gutter: 2em;
+	--darker-color: #181818;
+	--dark-color: #232323;
+	--light-color: #efefef;
+	--success-color: #6cc730;
+	--warning-color: #999900;
+	--danger-color: #972c24;
 }
 
 body {
@@ -9,8 +15,8 @@ body {
 	  sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	background-color: #181818;
-	color: #efefef;
+	background-color: var(--darker-color);
+	color: var(--light-color);
 	line-height: 1.6em;
 	box-sizing: border-box;
 }
@@ -31,7 +37,7 @@ th {
 }
 
 tbody tr:nth-of-type(odd) {
-	background-color: rgba(0, 0, 0, 0.1);
+	background-color: var(--darker-color);
 }
 
 tbody tr:hover {
@@ -51,10 +57,43 @@ th, td {
 
 h3 {
 	font-weight: 500;
-	color: #fff;
+	color: var(--light-color);
 }
 
-.App {}
+
+/**
+* Alerts
+*/
+.alerts {
+	margin: 0;
+	padding: 0;
+}
+
+.alert {
+	display: block;
+	background-color: var(--dark-color);
+	box-shadow: 0 5px 10px 5px rgba(0,0,0,0.2);
+	padding: 1rem 2rem;
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 1.5rem;
+}
+
+.alert.alert-danger {
+	background-color: var(--danger-color);
+}
+
+.alert.alert-success {
+	background-color: var(--success-color);
+}
+
+.alert.alert-warning {
+	background-color: var(--warning-color);
+}
+
+.App {
+	width: 100%;
+}
 
 .App-logo {
 	width: 150px;
@@ -87,31 +126,36 @@ h3 {
 
 .App-nav ul li a {
 	padding: 10px;
-	color: #f7f7f7;
+	color: var(--light-color);
 	text-decoration: none;
+	opacity: 0.5;
 }
 
-.App-link {}
+.App-nav ul li a.active {
+	opacity: 1;
+}
 
 .conn-status {
-	color: #fff;
+	color: var(--light-color);
 }
 
 .conn-status.connecting {
-	color: #999900;
+	color: var(--warning-color);
 }
 
 .conn-status.connected {
-	color: #009900;
+	color: var(--success-color);
 }
 
 .conn-status.disconnected {
-	color: #990000;
+	color: var(--danger-color);
 }
 
 .App-content {
 	width: 100%;
-	margin: 0 auto;
+	box-sizing: border-box;
+	display: grid;
+	padding: 0 var(--gutter);
 }
 
 .dashboard {
@@ -124,8 +168,6 @@ h3 {
 	'openPositions 		openOrders'
 	'bots 				bots';
 	grid-gap: var(--gutter);
-	padding: 0 var(--gutter);
-	margin-bottom: var(--gutter);
 }
 
 .dashboard .cards {
@@ -148,7 +190,12 @@ h3 {
 }
 
 .widget {
-	background-color: #252525;
+	background-color: var(--dark-color);
+}
+
+.widget.tradesSummary .metrics {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
 }
 
 .widget .widget-header {
@@ -221,9 +268,53 @@ h3 {
 }
 
 .up {
-	color: #6cc730;
+	color: var(--success-color);
 }
 
 .down {
-	color: #f12718;
+	color: var(--danger-color);
 }
+
+form .form-field input {
+	width: 100%;
+	padding: 0.5rem;
+	outline: none;
+	border: none;
+	box-sizing: border-box;
+}
+
+button {
+	border: none;
+	outline: none;
+	padding: 0.5rem 0.75rem;
+}
+
+.login {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+}
+
+.login .login-content {
+	/* max-width: 20rem; */
+	padding: var(--gutter);
+	background-color: var(--dark-color);
+	width: 20rem;
+	box-shadow: 0 5px 10px 5px rgba(0,0,0,0.2);
+}
+
+.login .login-content h1 {
+	margin-top: 0;
+	margin-bottom: 1.5rem;
+}
+
+.login .login-content form {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.login .login-content form .form-field {
+	margin-bottom: 1.5rem;
+	width: 100%;
+} 

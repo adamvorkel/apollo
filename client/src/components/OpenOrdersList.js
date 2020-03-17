@@ -19,7 +19,7 @@ const OpenOrdersList = ({openOrders}) => (
                     </tr>
                 </thead>
                 <tbody>
-                    {openOrders.map((order, index) => (
+                    {/* {openOrders.map((order, index) => (
                         <tr key={index}>
                             <td>{order.id}</td>
                             <td>{order.asset}</td>
@@ -27,7 +27,7 @@ const OpenOrdersList = ({openOrders}) => (
                             <td>{order.amount}</td>
                             <td>{order.age}</td>
                         </tr>
-                    ))}
+                    ))} */}
                 </tbody>
             </table>
         </div>
