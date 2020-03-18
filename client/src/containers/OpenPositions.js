@@ -1,4 +1,4 @@
-import { connect } from 'react-redux';
+// import { connect } from 'react-redux';
 import OpenPositionsList from '../components/OpenPositionsList';
 
 const OpenPositions = OpenPositionsList;

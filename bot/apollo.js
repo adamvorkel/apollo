@@ -17,6 +17,9 @@ const boot = async config => {
         let b2 = ctrl.createBot(c2);
         let b3 = ctrl.createBot(c3);
         let b4 = ctrl.createBot(c4);
+        setInterval(() => {
+            api.broadcast('heartbreat', 'beat');
+        }, 2000);
     } catch(error) {
         console.log("Boot failed: ", error.message);
         process.exit(1);

@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Header from './Layout/Header';
+
+import { connect as wsconnect } from '../actions/ws';
+
+// import Header from './Layout/Header';
 import Login from './Pages/Login';
 import Dashboard from './Pages/Dashboard';
 import Sales from './Pages/Sales';
@@ -8,21 +12,30 @@ import Stats from './Pages/Stats';
 
 import '../App.css';
 
-const App  = () => (
-	<Router>
-		<div className="App">
-			{/* <Header /> */}
-			<div className="App-content">
-				<Route exact path="/" component={Login}/>
-				<Switch>
-					<Route exact path="/dashboard" component={Dashboard}/>
-					<Route exact path="/sales" component={Sales}/>
-					<Route exact path="/stats" component={Stats}/>
-				</Switch>
-			</div>
-		</div>
-	</Router>
-)
+class App extends Component {
+	componentDidMount() {
+		const { wsconnect } = this.props;
+		wsconnect('ws://localhost:3001');
+	}
+
+	render() {
+		return (
+			<Router>
+				<div className="App">
+					{/* <Header /> */}
+					<div className="App-content">
+						<Route exact path="/" component={Login} />
+						<Switch>
+							<Route exact path="/dashboard" component={Dashboard} />
+							<Route exact path="/sales" component={Sales} />
+							<Route exact path="/stats" component={Stats} />
+						</Switch>
+					</div>
+				</div>
+			</Router>
+		)
+	}
+}
 
 /*
 //ENUM of ws status
@@ -31,52 +44,6 @@ const CONN_STATUS = {
 	DISCONNECTED: 0,
 	CONNECTED: 1
 };
-
-class App extends React.Component {
-	constructor(props) {
-		super(props);
-
-	}
-
-	componentDidMount() {
-		let ws = new WebSocket("ws://localhost:3001");
-
-		ws.onopen = event => {
-			this.setState({
-				ws:ws,
-				status: CONN_STATUS.CONNECTED
-			});
-		};
-
-		ws.onerror = err => {
-			this.setState({
-				ws:null, 
-				status: CONN_STATUS.DISCONNECTED,
-				error: "can't connect"
-			});
-		};
-
-		ws.onmessage = message => {
-			let data;
-			try {
-				data = JSON.parse(message.data);
-			} catch(err) {
-				data = {};
-				console.log("Error parsing message");
-			}
-	
-			if(data.event === 'state') {
-				console.log(data.payload);
-			}
-		}
-
-		ws.onclose = event => {
-			this.setState({
-				ws:null,
-				status: CONN_STATUS.DISCONNECTED
-			});
-		};
-	}
 
 	render() {
 		const {status, error} = this.state;
@@ -118,5 +85,18 @@ class App extends React.Component {
 }
 */
 
+// const mapStateToProps = state => {
+// 	return {
 
-export default App;
+// 	}
+// }
+
+const mapDisptachToProps = dispatch => {
+	return {
+		wsconnect: url => {
+			dispatch(wsconnect(url));
+		}
+	};
+};
+
+export default connect(null, mapDisptachToProps)(App);
