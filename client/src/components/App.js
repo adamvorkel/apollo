@@ -91,12 +91,4 @@ const CONN_STATUS = {
 // 	}
 // }
 
-const mapDisptachToProps = dispatch => {
-	return {
-		wsconnect: url => {
-			dispatch(wsconnect(url));
-		}
-	};
-};
-
-export default connect(null, mapDisptachToProps)(App);
+export default connect(null, { wsconnect })(App);
