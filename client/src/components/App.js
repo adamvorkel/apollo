@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 import { connect as wsconnect } from '../actions/ws';
 
-// import Header from './Layout/Header';
+import Header from './Layout/Header';
 import Login from './Pages/Login';
 import Dashboard from './Pages/Dashboard';
 import Sales from './Pages/Sales';
@@ -22,7 +22,7 @@ class App extends Component {
 		return (
 			<Router>
 				<div className="App">
-					{/* <Header /> */}
+					<Header />
 					<div className="App-content">
 						<Route exact path="/" component={Login} />
 						<Switch>
