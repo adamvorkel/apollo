@@ -64,6 +64,10 @@ class Controller extends EventEmitter {
             'paper': paperBots
         };
     }
+
+    getTicker() {
+        
+    }
 }
 
 module.exports = Controller;

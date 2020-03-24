@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
 
-class Store {
+class db {
     constructor(config) {
         this.config = config;
+        this.uri = config.db.uri;
         this.connected = false;
     }
 
     async connect() {
         try {
-            await mongoose.connect(this.config.db.uri, {
+            await mongoose.connect(this.uri, {
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
                 useCreateIndex: true
@@ -26,4 +27,4 @@ class Store {
     }
 }
 
-module.exports = Store;
+module.exports = db;

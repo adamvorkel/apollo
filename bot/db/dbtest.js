@@ -1,6 +1,5 @@
-const database = require('./db');
+const db = require('./db');
 const config = require('../config');
 
-const db = new database(config);
-let connection = db.connect();
-console.log(connection)
+const database = new db(config);
+database.connect();
