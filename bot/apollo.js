@@ -13,12 +13,18 @@ const boot = async config => {
         let ctrl = new controller(config);
         let api = server(config, ctrl);
         console.log("Boot complete");
-        let b1 = ctrl.createBot(c1);
-        let b2 = ctrl.createBot(c2);
-        let b3 = ctrl.createBot(c3);
-        let b4 = ctrl.createBot(c4);
-        
+
+
+        setTimeout(() => {ctrl.createLiveBot(c1)}, 0);
+        setTimeout(() => {ctrl.createPaperBot(c1)}, 0);
+        // setTimeout(() => {ctrl.createPaperBot(c1)}, 0);
+        // setTimeout(() => {ctrl.createPaperBot(c1)}, 0);
+
+
+
+        // ctrl.createPaperBot(c2);
     } catch(error) {
+        console.log(error)
         console.log("Boot failed: ", error.message);
         process.exit(1);
     }

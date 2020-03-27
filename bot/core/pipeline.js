@@ -11,22 +11,29 @@ const trader = require('./trader');
  */
 
 class pipeline extends Writable {
-    constructor(config, broker) {
+    constructor(config) {
         super({objectMode: true});
         this.config = config;
-
-        this.advisor = new advisor(config);
-        this.trader = new trader(config, broker);
         this.plugins = new Map();
-
-        this.setup();
         this.loadPlugins();
         this.subscribePlugins();
+
+        this.advisor = new advisor(config);
+        this.trader = new trader(config);
+
+        this.advisor.on('advice', this.trader.processAdvice);
     }
 
-    setup() {
-        // trader acts on advisors advice
-        this.advisor.on('advice', this.trader.processAdvice);
+    _write(candle, _, done) {
+        this.advisor.processCandle(candle);
+        this.trader.processCandle(candle);
+        for(const pluginSlug in this.plugins) {
+            let plugin = this.plugins[pluginSlug];
+            if(plugin.meta.candleConsumer) {
+                plugin.processCandle(candle);
+            }
+        }
+        done();
     }
 
     loadPlugins() {
@@ -63,17 +70,7 @@ class pipeline extends Writable {
         });
     }
 
-    _write(candle, _, callback) {
-        this.advisor.processCandle(candle);
-        this.trader.processCandle(candle);
-        for(const pluginSlug in this.plugins) {
-            let plugin = this.plugins[pluginSlug];
-            if(plugin.meta.candleConsumer) {
-                plugin.processCandle(candle);
-            }
-        }
-        callback();
-    }
+    
 
     finalize() {
         for(const pluginSlug in this.plugins) {

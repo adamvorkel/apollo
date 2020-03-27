@@ -1,8 +1,7 @@
-let realtimeMarket = require('./realtime');
-let backtestMarket = require('./backtest');
+let live = require('./live');
+let backtest = require('./backtest');
 
 module.exports = {
-    'realtime': realtimeMarket,
-    'paper': realtimeMarket,
-    'backtest': backtestMarket
+    live, 
+    backtest
 }

@@ -12,9 +12,9 @@ class MyStrategy extends strategy {
     }
 
     check(candle) {
-        console.log("STRAT INDICATORS:");
+        //console.log("STRAT INDICATORS:");
         this.indicators.forEach((i, name) => {
-            console.log(`${name}: ${i.result}`);
+            //console.log(`${name}: ${i.result}`);
         })
         // console.log("I am now running my strategy...");
     }

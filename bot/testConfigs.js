@@ -1,9 +1,5 @@
 let c1  = {
-    mode: "paper",
-    watch: {
-        currency: "USDT",
-        asset: "BTC",
-    },
+    pair: "BTC/USDT",
     strategy: {
         name: 'myStrategy',
         params: {requiredHistory: 5}
@@ -15,11 +11,7 @@ let c1  = {
 };
 
 let c2  = {
-    mode: "realtime",
-    watch: {
-        currency: "BTC",
-        asset: "BNB",
-    },
+    pair: "BNB/BTC",
     strategy: {
         name: 'myStrategy',
         params: []
@@ -27,11 +19,7 @@ let c2  = {
 };
 
 let c3  = {
-    mode: "realtime",
-    watch: {
-        currency: "BTC",
-        asset: "ZEC",
-    },
+    pair: "ZEC/BTC",
     strategy: {
         name: 'myStrategy',
         params: []
@@ -39,11 +27,7 @@ let c3  = {
 };
 
 let c4  = {
-    mode: "paper",
-    watch: {
-        currency: "BTC",
-        asset: "EOS",
-    },
+    pair: "EOS/BTC",
     strategy: {
         name: 'myStrategy',
         params: []
@@ -51,11 +35,7 @@ let c4  = {
 };
 
 let c5  = {
-    mode: "paper",
-    watch: {
-        currency: "BTC",
-        asset: "XRP",
-    },
+    pair: "XRP/BTC",
     strategy: {
         name: 'myStrategy',
         params: []
@@ -63,11 +43,7 @@ let c5  = {
 };
 
 let c6  = {
-    mode: "backtest",
-    watch: {
-        currency: "BTC",
-        asset: "ETH",
-    },
+    pair: "BTC/USDT",
     daterange: {
         from: '',
         to: ''

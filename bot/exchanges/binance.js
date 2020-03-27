@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const request = require('request');
+const BinanceWS = require('./binanceWS');
 
 class Binance {
     constructor(config) {
@@ -21,8 +22,6 @@ class Binance {
     _getTime() {
         return new Date().getTime();
     }
-
-    
 
     _sign(queryString) {
         return crypto
@@ -86,7 +85,7 @@ class Binance {
                         this._getDrift().then(drift => {
                             console.log("DRIFTING");
                             this._drift = drift;
-                            query.timestamp = _setTimestamp(query);
+                            query.timestamp = this._setTimestamp(query);
                             return this._makeRequest(query, route, security, method, ++attempt);
                         });
                     }
@@ -152,8 +151,7 @@ class Binance {
 
     klines(query = {}) {
         return this._makeRequest(query, "api/v3/klines");
-    }
-    
+    } 
 
     //SIGNED requests
 
@@ -165,9 +163,9 @@ class Binance {
 
     async getPortfolio() {
         let accountInfo = await this.account();
-        return accountInfo.balances.filter(asset => {
-            return parseFloat(asset.free) > 0 || parseFloat(asset.locked) > 0;
-        });
+        return accountInfo.balances
+        .filter(asset => parseFloat(asset.free) > 0 || parseFloat(asset.locked) > 0)
+        .reduce((map, asset) => map.set(asset.asset, {free: asset.free, locked: asset.locked}), new Map());
     }
 
     async getFee() {
@@ -224,12 +222,41 @@ class Binance {
         return this.newOrder(req);
     }
 
-    buy(quantity, price) {
-        return this.addOrder('buy', quantity, price);
+    buy(pair, quantity, price) {
+        return this.addOrder('buy', pair, quantity, price);
     }
 
-    sell(quantity, price) {
-        return this.addOrder('sell', quantity, price);
+    sell(pair, quantity, price) {
+        return this.addOrder('sell', pair, quantity, price);
+    }
+
+    
+
+    startUserDataStream() {
+        return this._makeRequest({}, '/api/v3/userDataStream', 'API-KEY', 'POST');
+    }
+
+    keepAliveUserDataStream(query) {
+        return this._makeRequest(query, '/api/v3/userDataStream', 'API-KEY', 'PUT');
+    }
+
+    closeUserDataStream(query) {
+        return this._makeRequest(query, '/api/v3/userDataStream', 'API-KEY', 'DELETE');
+    }
+
+    getConnection() {
+        let connection = new BinanceWS();
+        return connection;
+    }
+
+    async getAccountConnection() {
+        let { listenKey } = await this.startUserDataStream();
+        setInterval(() => {
+            this.keepAliveUserDataStream({ listenKey });
+        }, 30*60*1000);
+        let connection = new BinanceWS();
+        connection.getStream(listenKey);
+        return connection;
     }
 }
 
