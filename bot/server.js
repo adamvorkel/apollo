@@ -8,18 +8,14 @@ const http = require('http');
  * 
  */
 
-let setupServer = (app) => {
-    return new Promise((resolve, reject) => {
-        
-        
-    })
-}
 
 /**
  * 
  * WSS server
  * 
  */
+
+ 
 let setupWSServer = (server) => {
     let wss = new WebSocketServer({server});
     

@@ -20,8 +20,6 @@ const boot = async config => {
         // setTimeout(() => {ctrl.createPaperBot(c1)}, 0);
         // setTimeout(() => {ctrl.createPaperBot(c1)}, 0);
 
-
-
         // ctrl.createPaperBot(c2);
     } catch(error) {
         console.log(error)
