@@ -1,0 +1,30 @@
+GET http://localhost:3001/api/bots
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRhbSIsImlhdCI6MTU4NTYwMTYyNCwiZXhwIjoxNTg1NjAxNjU0fQ.Hc9niDNfoI7mXFIYpAx1s1_ybh217P_Tb0XCLr7EYBg
+
+###
+
+POST http://localhost:3001/token
+Content-Type: application/json
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRhbSIsImlhdCI6MTU4NTYwMTUyNH0.BlR5xrNjkaJmrReB7T0AFzDnyTbAkoqeAu2nxhAIMbk"
+}
+
+###
+
+POST http://localhost:3001/login
+Content-Type: application/json
+
+{
+    "username": "Adam"
+}
+
+###
+
+DELETE http://localhost:3001/logout
+Content-Type: application/json
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRhbSIsImlhdCI6MTU4NTYwMTUyNH0.BlR5xrNjkaJmrReB7T0AFzDnyTbAkoqeAu2nxhAIMbk"
+}
+

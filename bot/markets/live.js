@@ -4,7 +4,7 @@ class Live {
         this.connections = new Map();
         this.tickers = new Map();
 
-        this.startTicker();
+        // this.startTicker();
     }
 
     async startTicker() {
