@@ -112,14 +112,11 @@ class ReconnectWS extends EventEmitter {
         this.emit('message', message);
         
         if(this._pendingConfirms.length) {
-            console.log(this._id, "Processing a confirm...", this._pendingConfirms.length);
             let payload = JSON.parse(message);
             this._pendingConfirms = this._pendingConfirms.filter((cb, index) => {
                 let done = cb(payload);
-                if(done) console.log(this._id, "Confirm complete ", payload)
                 return !done;
             });
-            console.log("Confirms", this._id, this._pendingConfirms.length);
         }
     }
 

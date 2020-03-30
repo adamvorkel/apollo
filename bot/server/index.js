@@ -1,24 +1,23 @@
 const express = require('express');
 const WebSocketServer = require('ws').Server;
 const http = require('http');
+const routes = require('./routes');
 
-/**
- * 
- * REST API server
- * 
- */
+let api = config => {
+    /**
+     * REST API config
+     */
+    let app = express();
+    app.use(express.json());
+    app.use(express.urlencoded({extended: true}));
+    app.use('/api', routes);
+    app.disable('x-powered-by');
+    let server = http.createServer(app);
 
-
-/**
- * 
- * WSS server
- * 
- */
-
- 
-let setupWSServer = (server) => {
+    /**
+     * WSS server
+     */
     let wss = new WebSocketServer({server});
-    
     wss.on('connection', ws => {
         console.log(`New websocket client connected`)
         ws.isAlive = true;
@@ -41,22 +40,6 @@ let setupWSServer = (server) => {
             ws.ping();
         })
     }, 10 * 1000);
-
-    return wss;
-}
-
-
-let api = (config, controller) => {
-
-    let app = express();
-    app.use(express.json());
-    app.use(express.urlencoded({extended: true}));
-
-    // Endpoints
-    app.get('/api/bots', (req, res) => {});
-
-    let server = http.createServer(app);
-    let wss = setupWSServer(server);
 
     server.listen(config.api.port, () => {
         console.log(`API listening on port ${config.api.port}`);

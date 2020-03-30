@@ -12,7 +12,7 @@ class BinanceWS {
             // set refresh timer for connection
             setInterval(() => {
                 this.ws._reconnect();
-            }, 2*60*1000);
+            }, 30*60*1000);
         });
 
         this.ws.on('reconnect', async () => {

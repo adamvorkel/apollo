@@ -11,9 +11,8 @@ const boot = async config => {
     console.log("Booting...");
     try {
         let ctrl = new controller(config);
-        let api = server(config, ctrl);
+        let api = server(config);
         console.log("Boot complete");
-
 
         setTimeout(() => {ctrl.createLiveBot(c1)}, 0);
         setTimeout(() => {ctrl.createPaperBot(c1)}, 0);
