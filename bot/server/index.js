@@ -4,16 +4,11 @@ const WebSocketServer = require('ws').Server;
 const jwt = require('jsonwebtoken');
 const routes = require('./routes');
 
-
-
-let api = config => {
-
-    // REST API config
+let setupExpress = () => {
     let app = express();
     app.use(express.json());
     app.use(express.urlencoded({extended: true}));
     app.disable('x-powered-by');
-    
     // AUTH
     const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
     const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
@@ -63,12 +58,10 @@ let api = config => {
         });
     });
 
-    app.use('/api', authenticateToken, routes);
-    let server = http.createServer(app);
+    return app;
+}
 
-    /**
-     * WSS server
-     */
+let setupWSS = (server) => {
     let wss = new WebSocketServer({server});
     wss.on('connection', ws => {
         console.log(`New websocket client connected`)
@@ -81,7 +74,7 @@ let api = config => {
             // handle socket error
         });
     });
-    
+
     // heartbeat
     setInterval(() => {
         wss.clients.forEach(ws => {
@@ -93,16 +86,32 @@ let api = config => {
         })
     }, 10 * 1000);
 
-    server.listen(config.api.port, () => {
-        console.log(`API listening on port ${config.api.port}`);
-    });
+    return wss;
+}  
 
-    const broadcast = (event, payload) => {
-        let message = JSON.stringify({ event, payload });
-        wss.clients.forEach(ws => ws.send(message));
+
+
+class API {
+    constructor(config) {
+        this.config = config;
+        this.app = setupExpress();
+        this.server = new http.createServer(this.app);
+        this.wss = setupWSS(this.server);
+        this.start();
     }
 
-    return { broadcast };
+    broadcast(event, payload) {
+        // this.api.broadcast(event, payload);
+        let message = JSON.stringify({ event, payload });
+        this.wss.clients.forEach(ws => ws.send(message));
+    }
+
+    start() {
+        const port = this.config.api.port;
+        this.server.listen(port, () => {
+            console.log(`API listening on port ${port}`);
+        });
+    }
 }
 
-module.exports = api;
+module.exports = API;
