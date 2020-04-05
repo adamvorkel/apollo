@@ -97,6 +97,7 @@ class API {
         this.app = setupExpress();
         this.server = new http.createServer(this.app);
         this.wss = setupWSS(this.server);
+        this.port = null;
         this.start();
     }
 
@@ -107,7 +108,7 @@ class API {
     }
 
     start() {
-        const port = this.config.api.port;
+        this.port = process.env.PORT || this.config.api.port || 5000;
         this.server.listen(port, () => {
             console.log(`API listening on port ${port}`);
         });
