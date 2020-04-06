@@ -3,16 +3,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRhbSIsI
 
 ###
 
-POST http://localhost:3001/token
+POST http://localhost:3001/auth/token
 Content-Type: application/json
 
 {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRhbSIsImlhdCI6MTU4NTYwMTUyNH0.BlR5xrNjkaJmrReB7T0AFzDnyTbAkoqeAu2nxhAIMbk"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRhbSIsImlhdCI6MTU4NjEyMDQ2M30.wMkhJteJuQS0ZKF4QLwICH6JMEvMvBczfwwEfHqOuTQ"
 }
 
 ###
 
-POST http://localhost:3001/login
+POST http://localhost:3001/auth/login
 Content-Type: application/json
 
 {
@@ -21,10 +21,10 @@ Content-Type: application/json
 
 ###
 
-DELETE http://localhost:3001/logout
+DELETE http://localhost:3001/auth/logout
 Content-Type: application/json
 
 {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRhbSIsImlhdCI6MTU4NTYwMTUyNH0.BlR5xrNjkaJmrReB7T0AFzDnyTbAkoqeAu2nxhAIMbk"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiQWRhbSIsImlhdCI6MTU4NjEyMDU3N30.OCUe5191CgsopAdmJFZb6ZO02vr7R9JDoX6IVucvZWA"
 }
 

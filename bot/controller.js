@@ -3,7 +3,6 @@ const pipeline = require('./core/pipeline');
 const exchanges = require('./exchanges');
 const portfolio = require('./portfolio');
 const markets = require('./markets');
-const brokers = require('./brokers');
 
 class Controller extends EventEmitter {
     constructor(config) {
@@ -14,7 +13,6 @@ class Controller extends EventEmitter {
         this.exchange = new exchanges[config.watch.exchange](config);
         this.portfolio = new portfolio();
         this.market = new markets.live(this.exchange);
-        this.broker = new brokers.live(this.exchange, this.portfolio);
 
         // Setup event emitters
         this.portfolio.on('update', portfolio => {
@@ -36,7 +34,7 @@ class Controller extends EventEmitter {
                 throw new Error(`Live bot already active for pair ${config.pair}`);
             }
 
-            let instance = new pipeline(config);
+            let instance = new pipeline(config, this.exchange);
             this.bots.live.set(id, {start, instance});
 
             let stream = await this.market.getKlineStream(config.pair);
@@ -54,7 +52,7 @@ class Controller extends EventEmitter {
         try {
             const start = Date.now();
             let id = `${config.pair}_paper_${start}`;
-            let instance = new pipeline(config);
+            let instance = new pipeline(config, {});
             // let portfolio = new portfolio();
             // let broker = new brokers.mock(portfolio);
             

@@ -1,14 +1,22 @@
 const EventEmitter = require('events');
+const Portfolio = require('./portfolio');
+
 
 class Trader extends EventEmitter {
-    constructor(config) {
+    constructor(config, exchange) {
         super();
         this.config = config;
+        this.exchange = exchange;
 
         this.price = null;
-        this.exposed = false;
-        this.activeStop = null;
-        this.orders = [];
+
+        this.position = null;
+        this.stop = null;
+
+        this.orders = {
+            open: [],
+            closed: []
+        };
 
         this.processAdvice = this.processAdvice.bind(this);
         this.createOrder = this.createOrder.bind(this);
@@ -16,20 +24,22 @@ class Trader extends EventEmitter {
 
     processCandle(candle) {
         this.price = candle.close;
-        if(this.activeStop) this.activeStop.update(this.price);
+        if(this.stop) this.stop.update(this.price);
         console.log(`${this.config.pair} trader:  ${this.price}`);
     }
 
     processAdvice(advice) {
         if(advice.action === 'buy') {
-            if(this.exposed) {
+            if(this.position) {
+                // if(this.orders.open.length) 
                 // cancel pending sell order if any
+
                 return;
             }
         } 
         else 
         if(advice.action === 'sell') {
-            if(!this.exposed) {
+            if(!this.position) {
                 // cancel pending buy order if any
                 return;
             }
@@ -43,6 +53,13 @@ class Trader extends EventEmitter {
         //create stop
         //console.log('Recieved advice to ' + advice.action);
         if(advice.stop) this.createStop(advice.stop);
+
+        let order = this.exchange.createOrder
+        this.orders.open.push(
+            new LimitOrder({ side: advice.action, amount: 5 })
+        );
+        
+        
         return Promise.resolve("test");
     }
 

@@ -3,6 +3,8 @@ const request = require('request');
 const axios = require('axios');
 const querystring = require('querystring');
 const BinanceWS = require('./binanceWS');
+const { LimitOrder } = require('./orders');
+
 
 class Binance {
     constructor(config) {
@@ -16,6 +18,10 @@ class Binance {
         this._drift = 0;
         this._key = config.watch.key;
         this._secret = config.watch.secret;
+
+        this.supports = {
+            order: ['market', 'limit']
+        }
     }
 
     _getTime() {
@@ -173,6 +179,8 @@ class Binance {
             timeInForce: 'GTC'
         });
     }
+
+
 
     async _openUserDataStream() {
         return this._request({url: '/api/v3/userDataStream', method: 'POST'}, 'API-KEY');

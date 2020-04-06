@@ -1,7 +1,7 @@
 const { Writable } = require('stream');
 const advisor = require('./advisor');
 const trader = require('./trader');
-
+const analyzer = require('./analyzer');
 
 /**
  * A bot is a pipeline of:
@@ -11,15 +11,17 @@ const trader = require('./trader');
  */
 
 class pipeline extends Writable {
-    constructor(config) {
+    constructor(config, exchange) {
         super({objectMode: true});
         this.config = config;
         this.plugins = new Map();
+        
+        this.advisor = new advisor(config);
+        this.trader = new trader(config, exchange);
+        this.analyzer = new analyzer(config);
+
         this.loadPlugins();
         this.subscribePlugins();
-
-        this.advisor = new advisor(config);
-        this.trader = new trader(config);
 
         this.advisor.on('advice', this.trader.processAdvice);
     }

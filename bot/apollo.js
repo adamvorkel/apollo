@@ -1,7 +1,7 @@
 const config = require('./config');
 const dotenv = require('dotenv');
 const controller = require('./controller');
-const clientFacade = require('./server');
+const server = require('./server');
 
 // setup environment stuff
 dotenv.config();
@@ -9,7 +9,7 @@ dotenv.config();
 // boot
 console.log("Booting...");
 let ctrl = new controller(config);
-let api = new clientFacade(config);
+let api = new server(config);
 console.log("Boot complete");
 
 // REMOVE: bot instances for dev/testing
