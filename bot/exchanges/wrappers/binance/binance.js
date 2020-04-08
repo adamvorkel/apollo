@@ -2,9 +2,10 @@ const crypto = require('crypto');
 const request = require('request');
 const axios = require('axios');
 const querystring = require('querystring');
+const { LimitOrder } = require('../../orders');
 const BinanceWS = require('./binanceWS');
-const { LimitOrder } = require('./orders');
-
+const CandleAdapter = require('./candleAdapter')
+const CandleBatcher = require('../../candleBatcher');
 
 class Binance {
     constructor(config) {
@@ -19,9 +20,7 @@ class Binance {
         this._key = config.watch.key;
         this._secret = config.watch.secret;
 
-        this.supports = {
-            order: ['market', 'limit']
-        }
+        this._sockets = new Map();
     }
 
     _getTime() {
@@ -180,8 +179,6 @@ class Binance {
         });
     }
 
-
-
     async _openUserDataStream() {
         return this._request({url: '/api/v3/userDataStream', method: 'POST'}, 'API-KEY');
     }
@@ -194,26 +191,45 @@ class Binance {
         return this._request({url: '/api/v3/userDataStream', method: 'DELETE', params: {listenKey}}, 'API-KEY');
     }
 
-    getConnection() {
-        let connection = new BinanceWS();
-        return connection;
+    /**
+     * Websocket stuff
+     */
+
+    getSocket(pair) {
+        let socket = this._sockets.get(pair);
+        if(!socket) {
+            let fpair = pair.replace('/', '').toLowerCase();
+            let endpoint = `${fpair}@kline_1m`;
+            socket = new BinanceWS(endpoint)
+            this._sockets.set(pair, socket);
+        }
+        return socket;
     }
 
-    async getAccountConnection() {
-        let { listenKey } = await this._openUserDataStream();
-        setInterval(() => this._refreshUserDataStream(listenKey), 30*60*1000);
-        let connection = new BinanceWS();
-        connection.getStream(listenKey);
-        return connection;
+
+    getKlineStream(pair, interval) {
+        let socket = this.getSocket(pair);
+        return socket.pipe(new CandleAdapter()).pipe(new CandleBatcher(interval));
     }
+
+    // async getAccountConnection() {
+    //     let { listenKey } = await this._openUserDataStream();
+    //     setInterval(() => this._refreshUserDataStream(listenKey), 30*60*1000);
+    //     let connection = new BinanceWS();
+    //     connection.getStream(listenKey);
+    //     return connection;
+    // }
 }
 
-// const exchange = new Binance({
-//     watch: {
-//         key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
-//         secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73",
-//     }
-// });
+const exchange = new Binance({
+    watch: {
+        key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
+        secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73",
+    }
+});
+
+let stream = exchange.getKlineStream('BTC/USDT', 2);
+stream.on('data', data => console.log(data))
 
 
 module.exports = Binance;

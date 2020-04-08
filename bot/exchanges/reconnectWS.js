@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const { EventEmitter } = require('events');
 
 class ReconnectWS extends EventEmitter {
-    constructor(url) {
+    constructor(url, options) {
         super();
         this._ws = null;
         this._url = url;
@@ -12,14 +12,16 @@ class ReconnectWS extends EventEmitter {
         this._connectionTimeout = 4000;
         this._connectTimeout = null;
         this._acceptOpenTimeout = null;
+        this._refreshInterval = null;
         this._messageQueue = [];
-        this._pendingConfirms = [];
-        this._id = Math.round(Math.random() * 1000);
 
         this._handleOpen = this._handleOpen.bind(this);
         this._handleClose = this._handleClose.bind(this);
         this._handleMessage = this._handleMessage.bind(this);
         this._handleError = this._handleError.bind(this);
+
+        if(options.refresh)
+            this._refreshInterval = setInterval(() => this._reconnect(), options.refresh)
 
         this._connect();
     }
@@ -51,7 +53,7 @@ class ReconnectWS extends EventEmitter {
         clearTimeout(this._connectTimeout);
         clearTimeout(this._acceptOpenTimeout);
         this._messageQueue = [];
-        this._pendingConfirms = [];
+        // this._pendingConfirms = [];
         this._retryCount = -1;
         
         if(!this._ws) return;
@@ -75,9 +77,7 @@ class ReconnectWS extends EventEmitter {
     }
 
     _wait(delay) {
-        return new Promise((resolve, reject) => {
-            setTimeout(resolve, delay);
-        });
+        return new Promise((resolve, reject) => { setTimeout(resolve, delay); });
     }
 
     _send(message) {
@@ -110,14 +110,6 @@ class ReconnectWS extends EventEmitter {
 
     _handleMessage(message) {
         this.emit('message', message);
-        
-        if(this._pendingConfirms.length) {
-            let payload = JSON.parse(message);
-            this._pendingConfirms = this._pendingConfirms.filter((cb, index) => {
-                let done = cb(payload);
-                return !done;
-            });
-        }
     }
 
     _handleError(event) {
@@ -126,19 +118,12 @@ class ReconnectWS extends EventEmitter {
         this._reconnect();
     }
 
-    subscribe(req, confirm) {
-        return new Promise((resolve, reject) => {
-            this._send(JSON.stringify(req));
-            this._pendingConfirms.push(res => {
-                let done = confirm(res) || false;
-                if(done) resolve();
-                return done;
-            });
-        });
-    }
-
     send(message) {
         this._send(message);
+    }
+
+    close() {
+        clearInterval(this._refreshInterval);
     }
 }
 
