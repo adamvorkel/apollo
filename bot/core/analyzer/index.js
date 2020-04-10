@@ -3,7 +3,7 @@ const { EventEmitter } = require('events');
 
 class Analyzer extends EventEmitter {
     constructor(config) {
-
+        super();
     }
 }
 

@@ -2,13 +2,13 @@ const EventEmitter = require('events');
 const path = require('path');
 
 class Strategy extends EventEmitter {
-    constructor(stratSettings) {
+    constructor(params) {
         super();
 
         this.age = 0;
         this.ready = false;
         this.indicators = new Map();
-        this.requiredHistory = stratSettings.params.requiredHistory || 1;
+        this.requiredHistory = params.requiredHistory || 1;
     }
 
     init() {

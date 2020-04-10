@@ -2,7 +2,10 @@ let c1  = {
     pair: "BTC/USDT",
     strategy: {
         name: 'myStrategy',
-        params: {requiredHistory: 5}
+        params: {
+            candleSize: 5, 
+            requiredHistory: 0
+        }
     },
     portfolio: {
         asset: 1,

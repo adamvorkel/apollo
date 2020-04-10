@@ -1,4 +1,4 @@
-const binance = require('./binance');
+const binance = require('./wrappers/binance');
 
 module.exports = {
     binance

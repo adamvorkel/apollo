@@ -1,86 +1,45 @@
-const { Writable } = require('stream');
 const advisor = require('./advisor');
 const trader = require('./trader');
 const analyzer = require('./analyzer');
+const pluginManager = require('./pluginManager');
 
 /**
  * A bot is a pipeline of:
  * - advisor: provides buy/sell advice from running strategy
  * - trader: creates/monitors orders based on advice
- * - plugins
+ * - plugins: a plugin manager allows loading of plugins for additional functionality
  */
 
-class pipeline extends Writable {
+class pipeline {
     constructor(config, exchange) {
-        super({objectMode: true});
         this.config = config;
-        this.plugins = new Map();
         
+        this.klines = exchange.getKlineStream(config.pair);
+        this.priceTicker = exchange.getPriceTicker(config.pair);
         this.advisor = new advisor(config);
         this.trader = new trader(config, exchange);
         this.analyzer = new analyzer(config);
+        this.plugins = new pluginManager(config);
 
-        this.loadPlugins();
-        this.subscribePlugins();
+        this._setup();
+    }
 
+    _setup() {
+        this.klines.on('data', candle => {
+            console.log('Kline stream data ', candle)
+            this.advisor.processCandle(candle);
+            this.plugins.processCandle(candle);
+        });
+        this.priceTicker.on('data', tick => {
+            console.log('Price Ticker stream data ', tick);
+            this.trader.processTick(tick);
+        });
         this.advisor.on('advice', this.trader.processAdvice);
+        this.trader.on()
     }
 
-    _write(candle, _, done) {
-        this.advisor.processCandle(candle);
-        this.trader.processCandle(candle);
-        for(const pluginSlug in this.plugins) {
-            let plugin = this.plugins[pluginSlug];
-            if(plugin.meta.candleConsumer) {
-                plugin.processCandle(candle);
-            }
-        }
-        done();
-    }
-
-    loadPlugins() {
-        let pluginMeta = require('../plugins/plugins');
-        const mode = this.config.mode;
-
-        pluginMeta.forEach(plugin => {
-            if(plugin.enabled) {
-                if(plugin.modes.includes(mode)) {
-                    try {
-                        let pluginType = require('../plugins/' + plugin.slug);
-                        let pluginInstance = new pluginType(this.config);
-                        pluginInstance.meta = plugin;
-                        this.plugins.set(plugin.slug, pluginInstance);
-                    } catch(err) {
-                        console.error(`Unable to load ${plugin.name} plugin`);
-                    }
-                }
-            } 
-        });
-    }
-
-    subscribePlugins() {
-        this.plugins.forEach((plugin, slug) => {
-            if(plugin.meta.subscriptions) {
-                plugin.meta.subscriptions.forEach(sub => {
-                    if(this.plugins.has(sub.emitter)) {
-                        this.plugins.get(sub.emitter).on(sub.event, plugin[sub.handler]);
-                    } else {
-                        throw new Error(`${slug} wants to subscribe to ${sub.emitter} but it is not enabled`);
-                    }
-                })
-            }
-        });
-    }
-
-    
-
-    finalize() {
-        for(const pluginSlug in this.plugins) {
-            let plugin = this.plugins[pluginSlug];
-            if(plugin.finalize) {
-                plugin.finalize();
-            }
-        }
+    _finalize() {
+        this.plugins.finalize();
     }
 }
 

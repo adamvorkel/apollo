@@ -4,8 +4,9 @@ const axios = require('axios');
 const querystring = require('querystring');
 const { LimitOrder } = require('../../orders');
 const BinanceWS = require('./binanceWS');
-const CandleAdapter = require('./candleAdapter')
-const CandleBatcher = require('../../candleBatcher');
+const CandleAdapter = require('./candleAdapter');
+const { PriceTickerAdapter } = require('./tickerAdapters');
+
 
 class Binance {
     constructor(config) {
@@ -207,9 +208,14 @@ class Binance {
     }
 
 
-    getKlineStream(pair, interval) {
+    getKlineStream(pair) {
         let socket = this.getSocket(pair);
-        return socket.pipe(new CandleAdapter()).pipe(new CandleBatcher(interval));
+        return socket.pipe(new CandleAdapter());
+    }
+
+    getPriceTicker(pair) {
+        let socket = this.getSocket(pair);
+        return socket.pipe(new PriceTickerAdapter());
     }
 
     // async getAccountConnection() {
@@ -221,15 +227,12 @@ class Binance {
     // }
 }
 
-const exchange = new Binance({
-    watch: {
-        key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
-        secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73",
-    }
-});
-
-let stream = exchange.getKlineStream('BTC/USDT', 2);
-stream.on('data', data => console.log(data))
+// const exchange = new Binance({
+//     watch: {
+//         key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
+//         secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73",
+//     }
+// });
 
 
 module.exports = Binance;

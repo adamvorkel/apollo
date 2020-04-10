@@ -22,8 +22,8 @@ class Trader extends EventEmitter {
         this.createOrder = this.createOrder.bind(this);
     }
 
-    processCandle(candle) {
-        this.price = candle.close;
+    processTick(tick) {
+        this.price = tick.price;
         if(this.stop) this.stop.update(this.price);
         console.log(`${this.config.pair} trader:  ${this.price}`);
     }

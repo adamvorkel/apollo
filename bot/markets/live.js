@@ -21,15 +21,15 @@ class Live {
 
     }
 
-    async getKlineStream(pair) {
-        if(!this.connections.has(pair)) 
-            this.connections.set(pair, this.exchange.getConnection());
+    // async getKlineStream(pair) {
+    //     if(!this.connections.has(pair)) 
+    //         this.connections.set(pair, this.exchange.getConnection());
 
-        let connection = this.connections.get(pair);
-        let klineStream = await connection.getKlineStream(pair);
-       
-        return klineStream;
-    }
+    //     let connection = this.connections.get(pair);
+    //     let klineStream = await connection.getKlineStream(pair);
+
+    //     return klineStream;
+    // }
 }
 
 module.exports = Live;

@@ -10,14 +10,8 @@ class Controller extends EventEmitter {
         this.config = config;
 
         // These are the live components
-        this.exchange = new exchanges[config.watch.exchange](config);
-        this.portfolio = new portfolio();
+        this.exchange = new exchanges[config.watch.exchange].api(config);
         this.market = new markets.live(this.exchange);
-
-        // Setup event emitters
-        this.portfolio.on('update', portfolio => {
-            console.log(portfolio);
-        });
         
         this.bots = {
             live: new Map(),
@@ -30,19 +24,9 @@ class Controller extends EventEmitter {
         try {
             const start = Date.now();
             let id = `${config.pair}_live`;
-            if(this.bots.live.has(id)) {
-                throw new Error(`Live bot already active for pair ${config.pair}`);
-            }
-
+            if(this.bots.live.has(id)) throw new Error(`Live bot already active for pair ${config.pair}`);
             let instance = new pipeline(config, this.exchange);
             this.bots.live.set(id, {start, instance});
-
-            let stream = await this.market.getKlineStream(config.pair);
-            stream.on('data', candle => {
-                instance.write(candle);
-            });
-
-            // setInterval(async () => {await this.broker.sync();}, 5000);
         } catch(error) {
             console.error(error);
         }
@@ -52,18 +36,8 @@ class Controller extends EventEmitter {
         try {
             const start = Date.now();
             let id = `${config.pair}_paper_${start}`;
-            let instance = new pipeline(config, {});
-            // let portfolio = new portfolio();
-            // let broker = new brokers.mock(portfolio);
-            
+            let instance = new pipeline(config, this.exchange/*{getPortfolio: () => {console.log('get mock portfolio vals here here')}}*/);
             this.bots.paper.set(id, {start, instance});
-
-            let stream = await this.market.getKlineStream(config.pair);
-            stream.on('data', candle => {
-                instance.write(candle);
-            });
-
-            
         } catch(error) {
             console.error(error);
         }
