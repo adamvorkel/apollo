@@ -35,7 +35,6 @@ class pipeline {
             this.trader.processTick(tick);
         });
         this.advisor.on('advice', this.trader.processAdvice);
-        this.trader.on()
     }
 
     _finalize() {

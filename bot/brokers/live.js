@@ -1,5 +1,8 @@
-class LiveBroker {
-    constructor(exchange, portfolio) {
+const EventEmitter = require('events');
+const portfolio = require('./portfolio');
+
+class LiveBroker extends EventEmitter {
+    constructor(exchange) {
         this.exchange = exchange;
         this.portfolio = portfolio;
     }

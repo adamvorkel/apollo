@@ -1,8 +1,8 @@
 const {EventEmitter} = require('events');
 const pipeline = require('./core/pipeline');
 const exchanges = require('./exchanges');
-const portfolio = require('./portfolio');
 const markets = require('./markets');
+const brokers = require('./brokers');
 
 class Controller extends EventEmitter {
     constructor(config) {
@@ -12,6 +12,7 @@ class Controller extends EventEmitter {
         // These are the live components
         this.exchange = new exchanges[config.watch.exchange].api(config);
         this.market = new markets.live(this.exchange);
+        this.broker = new brokers.live(this.exchange);
         
         this.bots = {
             live: new Map(),

@@ -1,4 +1,3 @@
-const path = require('path');
 let pluginMetadata = require(`../../plugins/plugins`);
 
 class PluginManager {

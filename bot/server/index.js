@@ -45,19 +45,16 @@ class API {
         this.server = new http.createServer(this.app);
         this.wss = setupWSS(this.server);
         this.port = process.env.PORT || this.config.api.port || 5000;
-        this.start();
+        this._start();
+    }
+    
+    _start() {
+        this.server.listen(this.port, () => console.log(`Server running on port ${this.port}`));
     }
 
     broadcast(event, payload) {
-        // this.api.broadcast(event, payload);
         let message = JSON.stringify({ event, payload });
         this.wss.clients.forEach(ws => ws.send(message));
-    }
-
-    start() {
-        this.server.listen(this.port, () => {
-            console.log(`Server running on port ${this.port}`);
-        });
     }
 }
 

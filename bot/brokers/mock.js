@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const portfolio = require('./portfolio');
 
 class PaperBroker extends EventEmitter {
     constructor(portfolio) {

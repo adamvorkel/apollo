@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const Portfolio = require('./portfolio');
+const Portfolio = require('../../brokers/portfolio');
 
 
 class Trader extends EventEmitter {
