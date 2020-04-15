@@ -16,8 +16,7 @@ class Controller extends EventEmitter {
         
         this.bots = {
             live: new Map(),
-            paper: new Map(),
-            backtest: new Map()    
+            paper: new Map()   
         }
     }
 
@@ -42,22 +41,6 @@ class Controller extends EventEmitter {
         } catch(error) {
             console.error(error);
         }
-    }
-
-    createBacktestBot(config) {
-        // try {
-        //     const start = Date.now();
-        //     let id = `${config.pair}_backtest_${start}`;
-        //     let portfolio = new portfolio();
-        //     let instance = new pipeline(config, new markets.backtest(), new brokers.mock(portfolio));
-        //     this.bots.backtest.set(id, {start, instance});
-        // } catch(error) {
-        //     console.error(error.message);
-        // }
-    }
-
-    getTicker() {
-
     }
 }
 
