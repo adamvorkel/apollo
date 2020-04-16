@@ -2,11 +2,11 @@ const crypto = require('crypto');
 const request = require('request');
 const axios = require('axios');
 const querystring = require('querystring');
-const { LimitOrder } = require('../../orders');
+const { LimitOrder } = require('../../../brokers/orders');
 const BinanceWS = require('./binanceWS');
 const CandleAdapter = require('./candleAdapter');
 const { PriceTickerAdapter } = require('./tickerAdapters');
-
+const AccountAdaper = require('./accountAdapter');
 
 class Binance {
     constructor(config) {
@@ -22,6 +22,10 @@ class Binance {
         this._secret = config.watch.secret;
 
         this._sockets = new Map();
+
+        this._accountStream = null;
+        this._refreshUserDataStreamInterval = null;
+        this._refreshUserDataStreamMS = 30*60*1000;
     }
 
     _getTime() {
@@ -84,6 +88,7 @@ class Binance {
                 if(err.response.status >= 400 && err.response.status <= 499 && err.response.data.code === -1021) {
                     //update time drift
                     await this._refreshDrift();
+                    console.log(this._drift)
                     err.config.params.timestamp = this._getTimestamp();
                 }
             } catch(error) { }
@@ -136,7 +141,13 @@ class Binance {
     }
 
     async createOrder(params) {
-        return this._request({url: 'api/v3/order', method: 'POST', params}, 'SIGNED', 3);
+        try {
+            let response = await this._request({url: 'api/v3/order', method: 'POST', params}, 'SIGNED', 3);
+            console.log(response)
+            return response;
+        } catch(error) {
+            console.log("AN ERRRROR ", error)
+        }
     }
 
     async cancelOrder(params) {
@@ -159,7 +170,7 @@ class Binance {
     }
 
     async buy(symbol, quantity, price) {
-        return this.createOrder({
+        const res = this.createOrder({
             symbol,
             quantity,
             price,
@@ -167,6 +178,8 @@ class Binance {
             type: 'LIMIT',
             timeInForce: 'GTC'
         });
+        
+        return { id: res.orderId, ts: res.transactTime };
     }
 
     async sell(symbol, quantity, price) {
@@ -218,13 +231,15 @@ class Binance {
         return socket.pipe(new PriceTickerAdapter());
     }
 
-    // async getAccountConnection() {
-    //     let { listenKey } = await this._openUserDataStream();
-    //     setInterval(() => this._refreshUserDataStream(listenKey), 30*60*1000);
-    //     let connection = new BinanceWS();
-    //     connection.getStream(listenKey);
-    //     return connection;
-    // }
+    async getAccountStream() {
+        if(!this._accountStream) {
+            let { listenKey } = await this._openUserDataStream();
+            this._refreshUserDataStreamInterval = setInterval(() => this._refreshUserDataStream(listenKey), this._refreshUserDataStreamMS);
+            this._accountStream = new BinanceWS(listenKey);
+        }
+
+        return this._accountStream.pipe(new AccountAdaper());
+    }
 }
 
 // const exchange = new Binance({
