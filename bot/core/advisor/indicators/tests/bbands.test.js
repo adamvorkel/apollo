@@ -1,4 +1,4 @@
-const bbands = require('./bbands');
+const bbands = require('../bbands');
 
 test('Bollinger Bands correct output for arbitrary price inputs', () => {
     let config = {

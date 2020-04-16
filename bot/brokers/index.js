@@ -1,7 +1,7 @@
 const live = require('./live');
-const mock = require('./mock');
+const paper = require('./paper');
 
 module.exports = {
     live,
-    mock
+    paper
 };

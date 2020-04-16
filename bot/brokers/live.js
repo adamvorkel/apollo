@@ -1,11 +1,13 @@
 const EventEmitter = require('events');
-const portfolio = require('./portfolio');
 
 class LiveBroker extends EventEmitter {
     constructor(exchange) {
         this.exchange = exchange;
-        this.portfolio = portfolio;
+        this.orders = [];
+        this.portfolio = null;
     }
+
+
 
     // async startSync() {
         // start update stream

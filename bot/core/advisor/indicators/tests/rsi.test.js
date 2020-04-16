@@ -1,4 +1,4 @@
-const RSI = require('./rsi');
+const RSI = require('../rsi');
 
 test('RSI correct result', () => {
     

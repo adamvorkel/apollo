@@ -1,4 +1,4 @@
-const STDDEV = require('./stddev');
+const STDDEV = require('../stddev');
 
 test('STDDEV correct output for arbitrary price inputs', () => {
     let config = {

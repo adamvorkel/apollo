@@ -1,4 +1,4 @@
-const EMA = require('./ema');
+const EMA = require('../ema');
 
 test('EMA correct result', () => {
     let config = {

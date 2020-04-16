@@ -1,4 +1,4 @@
-const SMA = require('./sma');
+const SMA = require('../sma');
 
 test('SMA correct output for arbitrary price inputs', () => {
     let config = {
