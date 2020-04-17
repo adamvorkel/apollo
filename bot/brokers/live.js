@@ -51,12 +51,12 @@ const exchange = new Binance({
     }
 });
 
-const broker = new LiveBroker(exchange);
-broker.buy({ symbol: 'EOSBTC', quantity: 5, price: 0.00033 }).then(response => {
-    console.log('Created new order, response ', response);
-}).catch(err => {
-    console.log("ORDER ERROR ", err)
-})
+// const broker = new LiveBroker(exchange);
+// broker.buy({ symbol: 'EOSBTC', quantity: 5, price: 0.00033 }).then(response => {
+//     console.log('Created new order, response ', response);
+// }).catch(err => {
+//     console.log("ORDER ERROR ", err)
+// })
 
 // broker.startSync().then(d => {
 //     console.log('Sync started ', d)

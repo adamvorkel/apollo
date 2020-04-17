@@ -10,6 +10,7 @@ class bbands {
         this.SMA = new SMA(options);
         this.STDDEV = new STDDEV(options);
         this.result = [0, 0, 0];
+        this.age = 0;
     }
 
     update(candle) {
@@ -19,6 +20,7 @@ class bbands {
         const middle = this.SMA.result;
         const upper = this.SMA.result + this.stddevs * this.STDDEV.result;
         this.result = [lower, middle, upper];
+        ++this.age;
     }
 }
 
