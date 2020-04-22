@@ -3,7 +3,7 @@ const EventEmitter = require('events');
 const CandleBatcher = require('../../exchanges/candleBatcher');
 
 class Advisor extends EventEmitter {
-    constructor(config) {
+    constructor(config, market) {
         super();
         this.config = config;
         this.strategy = null;
@@ -30,6 +30,7 @@ class Advisor extends EventEmitter {
             throw new Error(`Unable to load strategy ${name}`);
         }
     }
+
 
     processCandle(candle) {
         this.batcher.write(candle);

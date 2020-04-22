@@ -1,6 +1,6 @@
 const { Transform } = require('stream');
 
-const isCandle = payload => payload.data && payload.data.e == 'kline';
+const isTicker = payload => payload.data && payload.data.e == '24hrTicker';
 
 class PriceTickerAdapter extends Transform {
     constructor() {
@@ -8,12 +8,17 @@ class PriceTickerAdapter extends Transform {
     }
 
     _transform(payload, _, done) {
-        if(isCandle(payload)) {
-            const kline = payload.data.k;
+        if(isTicker(payload)) {
+            let tickerData = payload.data;
             this.push({
-                pair: kline.s.toLowerCase(),
-                time: kline.t,
-                price: parseFloat(kline.c),
+                pair: tickerData.s.toLowerCase(),
+                time: tickerData.E,
+                price: parseFloat(tickerData.c),
+                quantity: parseFloat(tickerData.Q),
+                bid: parseFloat(tickerData.b),
+                bidQuantity: parseFloat(tickerData.B),
+                ask: parseFloat(tickerData.a),
+                askQuantity: parseFloat(tickerData.A),
             });
         }
         done();

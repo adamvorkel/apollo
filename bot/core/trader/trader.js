@@ -3,10 +3,9 @@ const Portfolio = require('../../brokers/portfolio');
 
 
 class Trader extends EventEmitter {
-    constructor(config, exchange) {
+    constructor(config) {
         super();
         this.config = config;
-        this.exchange = exchange;
 
         this.price = null;
 
@@ -25,7 +24,7 @@ class Trader extends EventEmitter {
     processTick(tick) {
         this.price = tick.price;
         if(this.stop) this.stop.update(this.price);
-        console.log(`${this.config.pair} trader:  ${this.price}`);
+        console.log(`${this.config.pair} trader:  ${this.price} | bid: ${tick.bid} | ask: ${tick.ask}`);
     }
 
     processAdvice(advice) {
@@ -54,10 +53,10 @@ class Trader extends EventEmitter {
         //console.log('Recieved advice to ' + advice.action);
         if(advice.stop) this.createStop(advice.stop);
 
-        let order = this.exchange.createOrder
-        this.orders.open.push(
-            new LimitOrder({ side: advice.action, amount: 5 })
-        );
+        // let order = this.exchange.createOrder
+        // this.orders.open.push(
+        //     new LimitOrder({ side: advice.action, amount: 5 })
+        // );
         
         
         return Promise.resolve("test");

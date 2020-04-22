@@ -11,13 +11,14 @@ const pluginManager = require('./pluginManager');
  */
 
 class pipeline {
-    constructor(config, exchange) {
+    constructor(config, market, broker) {
         this.config = config;
         
-        this.klines = exchange.getKlineStream(config.pair);
-        this.priceTicker = exchange.getPriceTicker(config.pair);
-        this.advisor = new advisor(config);
-        this.trader = new trader(config, exchange);
+        this.klines = market.getKlineStream(config.pair);
+        this.priceTicker = market.getTickerStream(config.pair);
+
+        this.advisor = new advisor(config, market);
+        this.trader = new trader(config, broker);
         this.analyzer = new analyzer(config);
         this.plugins = new pluginManager(config);
 
@@ -26,12 +27,10 @@ class pipeline {
 
     _setup() {
         this.klines.on('data', candle => {
-            console.log('Kline stream data ', candle)
             this.advisor.processCandle(candle);
             this.plugins.processCandle(candle);
         });
         this.priceTicker.on('data', tick => {
-            console.log('Price Ticker stream data ', tick);
             this.trader.processTick(tick);
         });
         this.advisor.on('advice', this.trader.processAdvice);

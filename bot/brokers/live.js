@@ -43,13 +43,13 @@ class LiveBroker extends EventEmitter {
 
 }
 
-const Binance = require('../exchanges/wrappers/binance').api;
-const exchange = new Binance({
-    watch: {
-        key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
-        secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73",
-    }
-});
+// const Binance = require('../exchanges/wrappers/binance').api;
+// const exchange = new Binance({
+//     watch: {
+//         key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
+//         secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73",
+//     }
+// });
 
 // const broker = new LiveBroker(exchange);
 // broker.buy({ symbol: 'EOSBTC', quantity: 5, price: 0.00033 }).then(response => {
@@ -62,4 +62,4 @@ const exchange = new Binance({
 //     console.log('Sync started ', d)
 // });
 
-//module.exports = LiveBroker;
+module.exports = LiveBroker;

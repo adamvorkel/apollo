@@ -8,8 +8,8 @@ class ReconnectWS extends EventEmitter {
         this._url = url;
         this._connectLock = false;
         this._retryCount = -1;
-        this._maxReconnectDelay = 10000;
-        this._connectionTimeout = 4000;
+        this._maxReconnectDelay = 30000;
+        this._connectionTimeout = 5000;
         this._connectTimeout = null;
         this._acceptOpenTimeout = null;
         this._refreshInterval = null;
@@ -77,7 +77,7 @@ class ReconnectWS extends EventEmitter {
     }
 
     _wait(delay) {
-        return new Promise((resolve, reject) => { setTimeout(resolve, delay); });
+        return new Promise(resolve => setTimeout(resolve, delay));
     }
 
     _send(message) {

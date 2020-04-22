@@ -17,8 +17,12 @@ class Live {
         });
     }
 
-    getTickers() {
+    getTickerStream(pair) {
+        return this.exchange.getTickerStream(pair)
+    }
 
+    getKlineStream(pair) {
+        return this.exchange.getKlineStream(pair)
     }
 
     async getKlines(symbol, interval, endTime, history) {
@@ -69,55 +73,47 @@ class Live {
         }
     }
 
-    // async getKlineStream(pair) {
-    //     if(!this.connections.has(pair)) 
-    //         this.connections.set(pair, this.exchange.getConnection());
-
-    //     let connection = this.connections.get(pair);
-    //     let klineStream = await connection.getKlineStream(pair);
-
-    //     return klineStream;
-    // }
+    
 }
 
-const Binance = require('../exchanges/wrappers/binance').api;
-const exchange = new Binance({
-    watch: {
-        key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
-        secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73",
-    }
-});
+// const Binance = require('../exchanges/wrappers/binance').api;
+// const exchange = new Binance({
+//     watch: {
+//         key: "gB8NBOByVIqXuAJxbPr266pPgpmJh4bAJz3UXg9ttBUNwde1Zt5K5kCgsd8u5193",
+//         secret: "YYEjznijxEqaGemsEudwIxmGVQZpI4q7XkrXD0lzL4g21djgltZmvdcyqJW4bi73",
+//     }
+// });
 
 
-/**
- * Testing stuff
- */
+// /**
+//  * Testing stuff
+//  */
 
-const market = new Live(exchange);
+// const market = new Live(exchange);
 
 
-let symbol = 'BTCUSDT';
-let now = Date.now();
-let interval = 5;
-let history = 25;
+// let symbol = 'BTCUSDT';
+// let now = Date.now();
+// let interval = 5;
+// let history = 25;
 
-market.getKlines(symbol, interval, now, history)
-.then(klines => {
-    console.log(`Recieved ${klines.length} klines`);
-    const BB = require('../core/advisor/indicators/bbands');
-    const EMA = require('../core/advisor/indicators/sma');
-    const myBB = new BB({period: 25, stddevs: 2});
-    const myEMA = new EMA({period: 25});
-    klines.forEach(kline => {
-        myEMA.update(kline);
-        myBB.update(kline);
-    });
-    console.log(`myBB final result: ${myBB.result}, age ${myBB.age}`);
-    console.log(`myEMA final result: ${myEMA.result}, age ${myEMA.age}`);
-})
-.catch((err) => {
-    console.log("ERRRRR ", err.message)
-})
+// market.getKlines(symbol, interval, now, history)
+// .then(klines => {
+//     console.log(`Recieved ${klines.length} klines`);
+//     const BB = require('../core/advisor/indicators/bbands');
+//     const EMA = require('../core/advisor/indicators/sma');
+//     const myBB = new BB({period: 25, stddevs: 2});
+//     const myEMA = new EMA({period: 25});
+//     klines.forEach(kline => {
+//         myEMA.update(kline);
+//         myBB.update(kline);
+//     });
+//     console.log(`myBB final result: ${myBB.result}, age ${myBB.age}`);
+//     console.log(`myEMA final result: ${myEMA.result}, age ${myEMA.age}`);
+// })
+// .catch((err) => {
+//     console.log("ERRRRR ", err.message)
+// })
 
 
 

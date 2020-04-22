@@ -36,7 +36,8 @@ class Strategy extends EventEmitter {
         if(!this.ready) {
             if(this.age >= this.requiredHistory) {
                 this.ready = true;
-                this.emit('stratReady', {start: candle.start});
+                this.emit('stratReady', { start: candle.start });
+                this.check(candle);
             }
         } else {
             this.check(candle);

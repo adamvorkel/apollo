@@ -212,8 +212,9 @@ class Binance {
     getSocket(pair) {
         let socket = this._sockets.get(pair);
         if(!socket) {
-            let fpair = pair.replace('/', '').toLowerCase();
-            let endpoint = `${fpair}@kline_1m`;
+            let symbol = pair.replace('/', '').toLowerCase();
+            let endpoint = [`${symbol}@kline_1m`, `${symbol}@ticker`];
+
             socket = new BinanceWS(endpoint)
             this._sockets.set(pair, socket);
         }
@@ -226,7 +227,7 @@ class Binance {
         return socket.pipe(new CandleAdapter());
     }
 
-    getPriceTicker(pair) {
+    getTickerStream(pair) {
         let socket = this.getSocket(pair);
         return socket.pipe(new PriceTickerAdapter());
     }

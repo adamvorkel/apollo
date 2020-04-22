@@ -20,27 +20,25 @@ class Controller extends EventEmitter {
         }
     }
 
-    async createLiveBot(config) {
+    async _createBot(config, market, broker) {
         try {
-            const start = Date.now();
-            let id = `${config.pair}_live`;
-            if(this.bots.live.has(id)) throw new Error(`Live bot already active for pair ${config.pair}`);
-            let instance = new pipeline(config, this.exchange);
-            this.bots.live.set(id, {start, instance});
-        } catch(error) {
-            console.error(error);
+            const instance = new pipeline(config, market, broker);
+            return instance;
+        } catch(err) {
+            console.log('Unable to create new bot...', err);
+            return false;
         }
     }
 
+    async createLiveBot(config) {
+        config.id = `${config.pair}_live`;
+        if(this.bots.live.has(config.id)) throw new Error(`Live bot already active for pair ${config.pair}`);
+        this.bots.live.set(config.id, this._createBot(config, this.market, this.broker));
+    }
+
     async createPaperBot(config) {
-        try {
-            const start = Date.now();
-            let id = `${config.pair}_paper_${start}`;
-            let instance = new pipeline(config, this.exchange/*{getPortfolio: () => {console.log('get mock portfolio vals here here')}}*/);
-            this.bots.paper.set(id, {start, instance});
-        } catch(error) {
-            console.error(error);
-        }
+        config.id = `${config.pair}_paper_${Date.now()}`;
+        this.bots.paper.set(config.id, this._createBot(config, this.market, this.broker));
     }
 }
 
